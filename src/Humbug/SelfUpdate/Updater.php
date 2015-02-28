@@ -6,141 +6,381 @@
  * @package    Humbug
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/humbug/blob/master/LICENSE New BSD License
+ *
+ * This class is partially patterned after Composer's self-update.
  */
 
 namespace Humbug;
 
-class SelfUpdate
+use Humbug\SelfUpdate\Exception\RuntimeException;
+use Humbug\SelfUpdate\Exception\InvalidArgumentException;
+use Humbug\SelfUpdate\Exception\FilesystemException;
+use Humbug\SelfUpdate\Exception\HttpRequestException;
+
+class Updater
 {
 
-    protected $name;
+    /**
+     * @var string
+     */
+    protected $localPharFile;
 
+    /**
+     * @var string
+     */
+    protected $localPharFileBasename;
+    
+    /**
+     * @var string
+     */
+    protected $localPubKeyFile;
+
+    /**
+     * @var bool
+     */
+    protected $hasPubKey;
+
+    /**
+     * @var string
+     */
     protected $pharUrl;
 
+    /**
+     * @var string
+     */
     protected $versionUrl;
 
-    protected $keysUrl;
+    /**
+     * @var string
+     */
+    protected $tempDirectory;
 
-    public function __construct($name, $pharUrl, $versionUrl, $keysUrl = null)
+    /**
+     * @var string
+     */
+    protected $newVersion;
+
+    /**
+     * @var string
+     */
+    protected $oldVersion;
+
+    /**
+     * @var bool
+     */
+    protected $newVersionAvailable;
+
+    /**
+     * Constructor
+     *
+     * @param string $localPharFile
+     * @param bool $hasPubKey
+     */
+    public function __construct($localPharFile = null, $hasPubKey = true)
     {
-        $this->name = $name;
-        $this->pharUrl = $pharUrl;
-        $this->versionUrl = $versionUrl;
-        $this->keysUrl = $keysUrl;
+        $this->setLocalPharFile($localPharFile);
+        if (!is_bool($hasPubKey)) {
+            throw new InvalidArgumentException(
+                'Constructor parameter $hasPubKey must be boolean or null'
+            );
+        } else {
+            $this->hasPubKey = $hasPubKey;
+        }
+        if ($this->hasPubKey) {
+            $this->setLocalPubKeyFile();
+        }
+        $this->hasPubKey = $hasPubKey;
+        $this->setTempDirectory();
     }
 
-    public function run()
+    /**
+     * Check for update
+     *
+     * @return bool
+     */
+    public function hasUpdate()
     {
-        $localFile = realpath($_SERVER['argv'][0]) ?: $_SERVER['argv'][0];
-        
+        $this->newVersionAvailable = $this->newVersionAvailable();
+        return $this->newVersionAvailable;
+    }
+
+    /**
+     * Perform an update
+     *
+     * @return bool
+     */
+    public function update()
+    {
+        if ($this->newVersionAvailable === false
+        || !is_bool($this->newVersionAvailable) && !$this->hasUpdate()) {
+            return false;
+        }
+        $this->backupPhar();
+        $this->downloadPhar();
+        $this->replacePhar();
+        return true;
+    }
+
+    /**
+     * Set URL to phar file
+     *
+     * @param string $url
+     */
+    public function setPharUrl($url)
+    {
+        if (!$this->validateHttpUrl($url)) {
+            throw new InvalidArgumentException(
+                sprintf('Invalid url passed as argument: %s', $url)
+            );
+        }
+        $this->pharUrl = $url;
+    }
+
+    /**
+     * Get URL for phar file
+     *
+     * @return string
+     */
+    public function getPharUrl()
+    {
+        return $this->pharUrl;
+    }
+
+    public function setVersionUrl($url)
+    {
+        if (!$this->validateHttpUrl($url)) {
+            throw new InvalidArgumentException(
+                sprintf('Invalid url passed as argument: %s', $url)
+            );
+        }
+        $this->versionUrl = $url;
+    }
+
+    public function getVersionUrl()
+    {
+        return $this->versionUrl;
+    }
+
+    public function getLocalPharFile()
+    {
+        return $this->localPharFile;
+    }
+
+    public function getLocalPharFileBasename()
+    {
+        return $this->localPharFileBasename;
+    }
+
+    public function getLocalPubKeyFile()
+    {
+        return $this->localPubKeyFile;
+    }
+
+    public function getTempDirectory()
+    {
+        return $this->tempDirectory;
+    }
+
+    public function getNewVersion()
+    {
+        return $this->newVersion;
+    }
+
+    public function getOldVersion()
+    {
+        return $this->oldVersion;
+    }
+
+    protected function hasPubKey()
+    {
+        return $this->hasPubKey;
+    }
+
+    protected function newVersonAvailable()
+    {
         $version = humbug_get_contents($this->versionUrl);
         if (empty($version)) {
-            $output->writeln('Incorrect version check response received. Please try again.');
-            return 1;
+            throw new HttpRequestException(
+                'Version request returned empty response'
+            );
         }
         if (!preg_match('%^[a-z0-9]{40}%', $version, $matches)) {
-            $output->writeln('Unexpected version format received. Please try again.');
-            return 1;
+            throw new HttpRequestException(
+                'Version request returned incorrectly formatted response'
+            );
         }
-        $newVersion = $matches[0];
 
-        $oldVersion = sha1_file($localFile);
+        $this->newVersion = $matches[0];
+        $this->oldVersion = sha1_file($localFile);
 
-        if ($newVersion !== $oldVersion) {
-            $this->replacePhar($localFile, $oldVersion, $newVersion, $output);
-        } else {
-            $output->writeln($this->name . ' is currently up to date.');
-            $output->writeln('Current SHA-1 hash is: ' . $oldVersion . '.');
+        if ($this->newVersion !== $this->oldVersion) {
+            return true;
+        }
+        return false
+    }
+
+    protected function backupPhar()
+    {
+        $result = copy($this->getLocalPharFile(), $this->getBackupPharFile());
+        if ($result === false) {
+            $this->cleanupAfterError();
+            throw new FilesystemException(sprintf(
+                    'Unable to backup %s to %s',
+                    $this->getLocalPharFile(),
+                    $this->getBackupPharFile()
+            ));
         }
     }
 
-    protected function replace()
+    protected function downloadPhar()
     {
-        $tmpDir = dirname($localFile);
-        $tmpFile = $tmpDir . '/' . basename($localFile, '.phar') . '.phar.temp';
-        $tmpPubKey = $tmpDir . '/' . basename($localFile, '.phar') . '.phar.temp.pubkey';
-        $localPubKey = $localFile . '.pubkey';
+        file_put_contents(
+            $this->getTempPharFile(),
+            humbug_get_contents($this->getPharUrl());
+        );
 
-        if (!is_writable($tmpDir)) {
+        if (!file_exists($this->getTempPharFile())) {
             throw new FilesystemException(
-                'Directory for file download not writeable: ' . $tmpDir
+                'Creation of download file failed'
             );
         }
-        if (!is_writable($localFile)) {
-            throw new FilesystemException(
-                'Current phar file is not writeable and cannot be replaced: ' . $localFile
-            );
-        }
-        if (!file_exists($localPubKey)) {
-            throw new FilesystemException(
-                'Unable to locate matching public key for this version'
-            );
-        }
-        
-        $output->writeln('Downloading new ' . $this->name . ' version');
 
-        try {
-            file_put_contents(
-                $tmpFile,
-                @humbug_get_contents($this->pharUrl);
-            );
-            if (!file_exists($tmpFile)) {
-                throw new FilesystemException(
-                    'Download failed for unknown reason'
-                );
-            }
-            $tmpVersion = sha1_file($tmpFile);
-            if ($tmpVersion !== $newVersion) {
-                @unlink($tmpFile);
-                $output->writeln('Downloaded file was corrupted. SHA-1 version hash does not match file.');
-                $output->writeln('Please try again.');
-                $output->writeln('Expected SHA-1: ' . $newVersion);
-                $output->writeln('Received SHA-1: ' . $tmpVersion);
-                return 1;
-            }
-        } catch (\Exception $e) {
-            @unlink($tmpFile);
-            if ($e instanceof FilesystemException) {
-                throw $e;
-            }
-            $this->writeln('Attempted download from remote URL failed: ' . self::PHAR);
-            return 1;
+        $tmpVersion = sha1_file($this->getTempPharFile());
+        if ($tmpVersion !== $this->getNewVersion()) {
+            $this->cleanupAfterError();
+            throw new HttpRequestException(sprintf(
+                'Download file appears to be corrupted or outdated. The file '
+                    . 'received does not have the expected SHA-1 hash: %s',
+                $this->getNewVersion()
+            ));
         }
 
         try {
-            @copy($localPubKey, $tmpPubKey);
-            @chmod($tmpFile, fileperms($localFile));
+            if ($this->hasPubKey()) {
+                @copy($this->getLocalPubKeyFile(), $this->getTempPubKeyFile());
+            }
+            @chmod($this->getTempPharFile(), fileperms($this->getLocalPharFile()));
             if (!ini_get('phar.readonly')) {
-                $phar = new \Phar($tmpFile);
+                $phar = new \Phar($this->getTempPharFile());
                 unset($phar);
             }
-            @unlink($tmpPubKey);
-            $backupFile = sprintf(
-                '%s-%s.phar.old',
-                strtolower($this->name),
-                $oldVersion
-            );
-            @copy($localFile, dirname($localFile) . '/' . $backupFile);
-            rename($tmpFile, $localFile);
+            if ($this->hasPubKey()) {
+                @unlink($this->getTempPubKeyFile());
+            }
         } catch (\Exception $e) {
-            @unlink($backupFile);
-            @unlink($tmpFile);
-            if (!$e instanceof \UnexpectedValueException) {
-                throw $e;
-            }
-            if ($e instanceof \UnexpectedValueException) {
-                $output->writeln('Downloaded file was corrupted. Please try again.');
-                return 1;
-            }
+            $this->cleanupAfterError();
+            throw $e;
         }
+    }
 
-        if (!file_exists(dirname($localFile) . '/' . $backupFile)) {
-            $this->writeln('A backup of the original phar file could not be saved.');
+    protected function replacePhar()
+    {
+        rename($this->getTempPharFile(), $this->localPharFile());
+    }
+
+    protected function getBackupPharFile()
+    {
+        return $this->getTempDirectory()
+            . '/'
+            . sprintf('%s.%s.phar', $this->localPharFileBasename(), $oldVersion
+        );
+    }
+
+    protected function getTempPharFile()
+    {
+        return $this->getTempDirectory()
+            . '/'
+            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename()
+        );
+    }
+
+    protected function getTempPubKeyFile()
+    {
+        return $this->getTempDirectory()
+            . '/'
+            . sprintf('%s.phar.temp.pubkey', $this->getLocalPharFileBasename()
+        );
+    }
+
+    protected function setLocalPharFile($localPharFile)
+    {
+        if (!is_null($localPharFile)) {
+            $localPharFile = realpath($localPharFile);
+            if (!file_exists($localPharFile)) {
+                throw new RuntimeException(
+                    sprintf('The set phar file does not exist: %s', $localPharFile)
+                );
+            }
+            if (!is_writable($localPharFile)) {
+                throw new FilesystemException(
+                    sprintf(
+                        'The current phar file is not writeable and cannot be replaced: %s',
+                        $localPharFile
+                    )
+                );
+            }
+            $this->localPharFile = $localPharFile;
+        } else {
+            $this->localPharFile = realpath($_SERVER['argv'][0]) ?: $_SERVER['argv'][0];
         }
+        $this->localPharFileBasename = basename($localPharFile, '.phar');
+    }
 
-        $output->writeln($this->name . ' has been updated.');
-        $output->writeln('Current SHA-1 hash is: ' . $newVersion . '.');
-        $output->writeln('Previous SHA-1 hash was: ' . $oldVersion . '.');   
+    protected function setLocalPubKeyFile()
+    {
+        $localPubKeyFile = $this->getLocalPharFile() . '.pubkey';
+        if (!file_exists($localPubKeyFile)) {
+            throw new RuntimeException(
+                sprintf('The phar pubkey file does not exist: %s', $localPubKeyFile)
+            );
+        }
+        if (!is_writable($localPubKeyFile)) {
+            throw new FilesystemException(
+                sprintf(
+                    'The current phar pubkey file is not writeable and cannot be replaced: %s',
+                    $localPubKeyFile
+                )
+            );
+        }
+        $this->localPubKeyFile = $localPubKeyFile;
+    }
+
+    protected function setTempDirectory()
+    {
+        $this->tempDirectory = dirname($this->getLocalPharFile());
+
+        $localPubKeyFile = $this->getLocalPharFile() . '.pubkey';
+        if (!file_exists($localPubKeyFile)) {
+            throw new RuntimeException(
+                sprintf('The phar pubkey file does not exist: %s', $localPubKeyFile)
+            );
+        }
+        if (!is_writable($localPubKeyFile)) {
+            throw new FilesystemException(
+                sprintf(
+                    'The current phar pubkey file is not writeable and cannot be replaced: %s',
+                    $localPubKeyFile
+                )
+            );
+        }
+        $this->localPubKeyFile = $localPubKeyFile;
+    }
+
+    protected function validateHttpUrl($url)
+    {
+        if (filter_var($url, FILTER_VALIDATE_URL)
+        && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'])) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function cleanupAfterError()
+    {
+        @unlink($this->getBackupPharFile());
+        @unlink($this->getBackupPubKeyFilename());
+        @unlink($this->getTempPharFile());
+        @unlink($this->getTempPubKeyFile);
     }
 
 }
