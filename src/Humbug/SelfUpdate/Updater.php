@@ -198,7 +198,7 @@ class Updater
 
     protected function newVersonAvailable()
     {
-        $version = humbug_get_contents($this->versionUrl);
+        $version = humbug_get_contents($this->getVersionUrl());
         if (empty($version)) {
             throw new HttpRequestException(
                 'Version request returned empty response'
@@ -211,7 +211,7 @@ class Updater
         }
 
         $this->newVersion = $matches[0];
-        $this->oldVersion = sha1_file($localFile);
+        $this->oldVersion = sha1_file($this->getLocalPharFile());
 
         if ($this->newVersion !== $this->oldVersion) {
             return true;
