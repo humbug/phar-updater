@@ -334,36 +334,18 @@ class Updater
                 sprintf('The phar pubkey file does not exist: %s', $localPubKeyFile)
             );
         }
-        if (!is_writable($localPubKeyFile)) {
-            throw new FilesystemException(
-                sprintf(
-                    'The current phar pubkey file is not writeable and cannot be replaced: %s',
-                    $localPubKeyFile
-                )
-            );
-        }
         $this->localPubKeyFile = $localPubKeyFile;
     }
 
     protected function setTempDirectory()
     {
-        $this->tempDirectory = dirname($this->getLocalPharFile());
-
-        $localPubKeyFile = $this->getLocalPharFile() . '.pubkey';
-        if (!file_exists($localPubKeyFile)) {
-            throw new RuntimeException(
-                sprintf('The phar pubkey file does not exist: %s', $localPubKeyFile)
-            );
+        $tempDirectory = dirname($this->getLocalPharFile());
+        if (!is_writable($tempDirectory)) {
+            throw new FilesystemException(sprintf(
+                'The directory is not writeable: %s', $tempDirectory
+            ));
         }
-        if (!is_writable($localPubKeyFile)) {
-            throw new FilesystemException(
-                sprintf(
-                    'The current phar pubkey file is not writeable and cannot be replaced: %s',
-                    $localPubKeyFile
-                )
-            );
-        }
-        $this->localPubKeyFile = $localPubKeyFile;
+        $this->tempDirectory = $tempDirectory;
     }
 
     protected function validateHttpUrl($url)
