@@ -10,7 +10,7 @@
  * This class is partially patterned after Composer's self-update.
  */
 
-namespace Humbug;
+namespace Humbug\SelfUpdate;
 
 use Humbug\SelfUpdate\Exception\RuntimeException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
@@ -216,7 +216,7 @@ class Updater
         if ($this->newVersion !== $this->oldVersion) {
             return true;
         }
-        return false
+        return false;
     }
 
     protected function backupPhar()
@@ -236,7 +236,7 @@ class Updater
     {
         file_put_contents(
             $this->getTempPharFile(),
-            humbug_get_contents($this->getPharUrl());
+            humbug_get_contents($this->getPharUrl())
         );
 
         if (!file_exists($this->getTempPharFile())) {
