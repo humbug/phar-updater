@@ -30,13 +30,11 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->files = __DIR__ . '/_files';
 
         $this->updater = new Updater($this->files . '/test.phar');
-
-        $this->deleteTempPhars();
     }
 
     public function teardown()
     {
-        
+        $this->deleteTempPhars();
     }
 
     public function testConstruction()
@@ -155,6 +153,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     {
         @unlink($this->tmp . '/old.phar');
         @unlink($this->tmp . '/old.phar.pubkey');
+        @unlink($this->tmp . '/old.1c7049180abee67826d35ce308c38272242b64b8.phar');
     }
     
 }
