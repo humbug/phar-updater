@@ -127,27 +127,35 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->updater->hasUpdate());
     }
 
-    public function testDownloadNewPharToTempDirectory()
+    public function testUpdatesPhar()
     {
-        $this->createTempPhar('foo', 'foo1');
+        $this->markTestIncomplete('Segmentation Fault');
+        //$this->createTempPhar('old', 'old', true);
+        //$this->createTempPhar('new', 'new', true);
+        //$updater = new Updater($this->tmp . '/old.phar');
+        //$updater->setPharUrl('file://' . $this->tmp . '/new.phar');
+        //$updater->setVersionUrl('file://' . $this->tmp . '/new.version');
+        //$this->assertTrue($updater->update());
+        //$this->assertEquals('new', $this->getPharOutput($this->tmp . '/old.phar'));
     }
 
     /**
      * Helpers
      */
 
-    private function createTempPhar($name, $echo, $sign = false)
+    private function createTempPhar($name, $out, $sign = false)
     {
         $path = $this->tmp . '/' . $name . '.phar';
         $version = $this->tmp . '/' . $name . '.version';
         $this->phars[] = $path;
         $phar = new \Phar($path);
-        $phar->addFromString('stub.php', sprintf('<?php echo "%s";', $echo));
-        $phar->setStub($phar->createDefaultStub('stub.php'));
+        $phar->addFromString('cli.php', '<?php echo "our";');
+        $phar->setStub($phar->createDefaultStub('cli.php'));
         if ($sign === true) {
             $phar->setSignatureAlgorithm(\Phar::OPENSSL, file_get_contents($this->files . '/privkey.pem'));
         }
         unset($phar);
+        copy($this->files . '/pubkey.pem', $path . '.pubkey');
         file_put_contents($version, sha1_file($path));
     }
 
@@ -160,6 +168,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     {
         foreach ($this->phars as $index => $phar) {
             @unlink($phar);
+            @unlink($phar . '.pubkey');
+            @unlink(dirname($phar) . '/' . basename($phar, '.phar') . '.version');
             unset($this->phars[$index]);
         }
     }

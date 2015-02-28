@@ -282,7 +282,7 @@ class Updater
     {
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s.%s.phar', $this->localPharFileBasename(), $oldVersion
+            . sprintf('%s.%s.phar', $this->getLocalPharFileBasename(), $oldVersion
         );
     }
 
