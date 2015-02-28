@@ -275,14 +275,14 @@ class Updater
 
     protected function replacePhar()
     {
-        rename($this->getTempPharFile(), $this->localPharFile());
+        rename($this->getTempPharFile(), $this->getLocalPharFile());
     }
 
     protected function getBackupPharFile()
     {
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s.%s.phar', $this->getLocalPharFileBasename(), $oldVersion
+            . sprintf('%s.%s.phar', $this->getLocalPharFileBasename(), $this->getOldVersion()
         );
     }
 

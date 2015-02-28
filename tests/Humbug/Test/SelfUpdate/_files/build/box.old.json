@@ -1,0 +1,10 @@
+{
+    "chmod": "0755",
+    "directories": [
+        "src/old"
+    ],
+    "main": "src/old/run.php",
+    "output": "old.phar",
+    "stub": true,
+    "key": "../privkey.pem"
+}

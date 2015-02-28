@@ -30,11 +30,13 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->files = __DIR__ . '/_files';
 
         $this->updater = new Updater($this->files . '/test.phar');
+
+        $this->deleteTempPhars();
     }
 
     public function teardown()
     {
-        $this->deleteTempPhars();
+        
     }
 
     public function testConstruction()
@@ -129,35 +131,20 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdatesPhar()
     {
-        $this->markTestIncomplete('Segmentation Fault');
-        //$this->createTempPhar('old', 'old', true);
-        //$this->createTempPhar('new', 'new', true);
-        //$updater = new Updater($this->tmp . '/old.phar');
-        //$updater->setPharUrl('file://' . $this->tmp . '/new.phar');
-        //$updater->setVersionUrl('file://' . $this->tmp . '/new.version');
-        //$this->assertTrue($updater->update());
-        //$this->assertEquals('new', $this->getPharOutput($this->tmp . '/old.phar'));
+        copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
+        copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
+        $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
+
+        $updater = new Updater($this->tmp . '/old.phar');
+        $updater->setPharUrl('file://' . $this->files . '/build/new.phar');
+        $updater->setVersionUrl('file://' . $this->files . '/build/new.version');
+        $this->assertTrue($updater->update());
+        $this->assertEquals('new', $this->getPharOutput($this->tmp . '/old.phar'));
     }
 
     /**
      * Helpers
      */
-
-    private function createTempPhar($name, $out, $sign = false)
-    {
-        $path = $this->tmp . '/' . $name . '.phar';
-        $version = $this->tmp . '/' . $name . '.version';
-        $this->phars[] = $path;
-        $phar = new \Phar($path);
-        $phar->addFromString('cli.php', '<?php echo "our";');
-        $phar->setStub($phar->createDefaultStub('cli.php'));
-        if ($sign === true) {
-            $phar->setSignatureAlgorithm(\Phar::OPENSSL, file_get_contents($this->files . '/privkey.pem'));
-        }
-        unset($phar);
-        copy($this->files . '/pubkey.pem', $path . '.pubkey');
-        file_put_contents($version, sha1_file($path));
-    }
 
     private function getPharOutput($path)
     {
@@ -166,12 +153,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     private function deleteTempPhars()
     {
-        foreach ($this->phars as $index => $phar) {
-            @unlink($phar);
-            @unlink($phar . '.pubkey');
-            @unlink(dirname($phar) . '/' . basename($phar, '.phar') . '.version');
-            unset($this->phars[$index]);
-        }
+        @unlink($this->tmp . '/old.phar');
+        @unlink($this->tmp . '/old.phar.pubkey');
     }
     
 }
