@@ -306,23 +306,23 @@ class Updater
     {
         if (!is_null($localPharFile)) {
             $localPharFile = realpath($localPharFile);
-            if (!file_exists($localPharFile)) {
-                throw new RuntimeException(
-                    sprintf('The set phar file does not exist: %s', $localPharFile)
-                );
-            }
-            if (!is_writable($localPharFile)) {
-                throw new FilesystemException(
-                    sprintf(
-                        'The current phar file is not writeable and cannot be replaced: %s',
-                        $localPharFile
-                    )
-                );
-            }
-            $this->localPharFile = $localPharFile;
         } else {
-            $this->localPharFile = realpath($_SERVER['argv'][0]) ?: $_SERVER['argv'][0];
+            $localPharFile = realpath($_SERVER['argv'][0]) ?: $_SERVER['argv'][0];
         }
+        if (!file_exists($localPharFile)) {
+            throw new RuntimeException(
+                sprintf('The set phar file does not exist: %s', $localPharFile)
+            );
+        }
+        if (!is_writable($localPharFile)) {
+            throw new FilesystemException(
+                sprintf(
+                    'The current phar file is not writeable and cannot be replaced: %s',
+                    $localPharFile
+                )
+            );
+        }
+        $this->localPharFile = $localPharFile;
         $this->localPharFileBasename = basename($localPharFile, '.phar');
     }
 
