@@ -128,7 +128,7 @@ class Updater
      */
     public function setPharUrl($url)
     {
-        if (!$this->validateHttpUrl($url)) {
+        if (!$this->validateAllowedUrl($url)) {
             throw new InvalidArgumentException(
                 sprintf('Invalid url passed as argument: %s', $url)
             );
@@ -148,7 +148,7 @@ class Updater
 
     public function setVersionUrl($url)
     {
-        if (!$this->validateHttpUrl($url)) {
+        if (!$this->validateAllowedUrl($url)) {
             throw new InvalidArgumentException(
                 sprintf('Invalid url passed as argument: %s', $url)
             );
@@ -196,7 +196,7 @@ class Updater
         return $this->hasPubKey;
     }
 
-    protected function newVersonAvailable()
+    protected function newVersionAvailable()
     {
         $version = humbug_get_contents($this->getVersionUrl());
         if (empty($version)) {
@@ -348,10 +348,10 @@ class Updater
         $this->tempDirectory = $tempDirectory;
     }
 
-    protected function validateHttpUrl($url)
+    protected function validateAllowedUrl($url)
     {
         if (filter_var($url, FILTER_VALIDATE_URL)
-        && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'])) {
+        && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https', 'file'])) {
             return true;
         }
         return false;

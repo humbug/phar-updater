@@ -52,10 +52,16 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->assertStringEndsWith('phpunit', $updater->getLocalPharFile());
     }
 
-    public function testConstructorThrowsExceptionIfPubKeyNotExists()
+    public function testConstructorThrowsExceptionIfPubKeyNotExistsButFlagTrue()
     {
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
         $updater = new Updater($this->files . '/test-nopubkey.phar');
+    }
+
+    public function testConstructorAncilliaryValues()
+    {
+        $this->assertEquals($this->updater->getLocalPharFileBasename(), 'test');
+        $this->assertEquals($this->updater->getTempDirectory(), $this->files);
     }
 
     public function testSetPharUrlWithUrl()
@@ -70,7 +76,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     public function testSetPharUrlThrowsExceptionOnInvalidUrl()
     {
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
-        $this->updater->setPharUrl('file:///home/padraic');
+        $this->updater->setPharUrl('silly:///home/padraic');
     }
 
     public function testSetVersionUrlWithUrl()
@@ -85,7 +91,23 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     public function testSetVersionUrlThrowsExceptionOnInvalidUrl()
     {
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
-        $this->updater->setVersionUrl('file:///home/padraic');
+        $this->updater->setVersionUrl('silly:///home/padraic');
+    }
+
+    public function testCanDetectNewVersion()
+    {
+        $this->updater->setVersionUrl('file://' . $this->files . '/good.version');
+        $this->assertTrue($this->updater->hasUpdate());
+    }
+
+    private function createTempPhars()
+    {
+
+    }
+
+    private function deleteTempPhars()
+    {
+
     }
     
 }
