@@ -378,7 +378,6 @@ class Updater
     protected function cleanupAfterError()
     {
         @unlink($this->getBackupPharFile());
-        @unlink($this->getBackupPubKeyFilename());
         @unlink($this->getTempPharFile());
         @unlink($this->getTempPubKeyFile);
     }
