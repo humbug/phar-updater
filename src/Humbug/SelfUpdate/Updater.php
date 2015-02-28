@@ -351,7 +351,7 @@ class Updater
     protected function validateAllowedUrl($url)
     {
         if (filter_var($url, FILTER_VALIDATE_URL)
-        && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https', 'file'])) {
+        && in_array(parse_url($url, PHP_URL_SCHEME), array('http', 'https', 'file'))) {
             return true;
         }
         return false;

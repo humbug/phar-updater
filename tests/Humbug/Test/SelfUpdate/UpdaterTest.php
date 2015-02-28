@@ -12,10 +12,6 @@
 namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
-use Humbug\SelfUpdate\Exception\RuntimeException;
-use Humbug\SelfUpdate\Exception\InvalidArgumentException;
-use Humbug\SelfUpdate\Exception\FilesystemException;
-use Humbug\SelfUpdate\Exception\HttpRequestException;
 
 class UpdaterTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,6 +21,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     private $updater;
 
     private $tmp;
+
+    private $phars = array();
 
     public function setup()
     {
@@ -129,14 +127,41 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->updater->hasUpdate());
     }
 
-    private function createTempPhars()
+    public function testDownloadNewPharToTempDirectory()
     {
+        $this->createTempPhar('foo', 'foo1');
+    }
 
+    /**
+     * Helpers
+     */
+
+    private function createTempPhar($name, $echo, $sign = false)
+    {
+        $path = $this->tmp . '/' . $name . '.phar';
+        $version = $this->tmp . '/' . $name . '.version';
+        $this->phars[] = $path;
+        $phar = new \Phar($path);
+        $phar->addFromString('stub.php', sprintf('<?php echo "%s";', $echo));
+        $phar->setStub($phar->createDefaultStub('stub.php'));
+        if ($sign === true) {
+            $phar->setSignatureAlgorithm(\Phar::OPENSSL, file_get_contents($this->files . '/privkey.pem'));
+        }
+        unset($phar);
+        file_put_contents($version, sha1_file($path));
+    }
+
+    private function getPharOutput($path)
+    {
+        return exec('php ' . escapeshellarg($path));
     }
 
     private function deleteTempPhars()
     {
-
+        foreach ($this->phars as $index => $phar) {
+            @unlink($phar);
+            unset($this->phars[$index]);
+        }
     }
     
 }
