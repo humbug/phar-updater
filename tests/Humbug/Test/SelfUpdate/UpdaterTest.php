@@ -24,15 +24,19 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     private $updater;
 
+    private $tmp;
+
     public function setup()
     {
+        $this->tmp = sys_get_temp_dir();
         $this->files = __DIR__ . '/_files';
+
         $this->updater = new Updater($this->files . '/test.phar');
     }
 
     public function teardown()
     {
-
+        $this->deleteTempPhars();
     }
 
     public function testConstruction()
@@ -49,7 +53,10 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
         // no name - detect running console app
         $updater = new Updater(null, false);
-        $this->assertStringEndsWith('phpunit', $updater->getLocalPharFile());
+        $this->assertStringEndsWith(
+            'phpunit.phar',
+            basename($updater->getLocalPharFile(), '.phar') . '.phar'
+        );
     }
 
     public function testConstructorThrowsExceptionIfPubKeyNotExistsButFlagTrue()
@@ -94,9 +101,31 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->updater->setVersionUrl('silly:///home/padraic');
     }
 
-    public function testCanDetectNewVersion()
+    public function testCanDetectNewRemoteVersionAndStoreVersions()
     {
         $this->updater->setVersionUrl('file://' . $this->files . '/good.version');
+        $this->assertTrue($this->updater->hasUpdate());
+        $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $this->updater->getOldVersion());
+        $this->assertEquals('1af1b9c94dea1ff337587bfa9109f1dad1ec7b9b', $this->updater->getNewVersion());
+    }
+
+    public function testThrowsExceptionOnEmptyRemoteVersion()
+    {
+        $this->setExpectedException(
+            'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
+            'Version request returned empty response'
+        );
+        $this->updater->setVersionUrl('file://' . $this->files . '/empty.version');
+        $this->assertTrue($this->updater->hasUpdate());
+    }
+
+    public function testThrowsExceptionOnInvalidRemoteVersion()
+    {
+        $this->setExpectedException(
+            'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
+            'Version request returned incorrectly formatted response'
+        );
+        $this->updater->setVersionUrl('file://' . $this->files . '/bad.version');
         $this->assertTrue($this->updater->hasUpdate());
     }
 
