@@ -147,6 +147,25 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     /**
      * @runInSeparateProcess
      */
+    public function testUpdatePharFailsIfCurrentPublicKeyInvalid()
+    {
+        $this->markTestSkipped('Segmentation fault at present under PHP');
+        copy($this->files . '/build/badkey.phar', $this->tmp . '/old.phar');
+        chmod($this->tmp . '/old.phar', 0755);
+        copy($this->files . '/build/badkey.phar.pubkey', $this->tmp . '/old.phar.pubkey');
+
+        $updater = new Updater($this->tmp . '/old.phar');
+        $updater->setPharUrl('file://' . $this->files . '/build/new.phar');
+        $updater->setVersionUrl('file://' . $this->files . '/build/new.version');
+
+        /** Invalid 'badkey' on original phar should generate an error (mapped to RuntimeException) */
+        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
+        $updater->update();
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
     public function testUpdatePharFailsOnSignatureMismatch()
     {
         copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');

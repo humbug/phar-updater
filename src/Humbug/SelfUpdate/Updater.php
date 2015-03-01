@@ -270,6 +270,7 @@ class Updater
                 /** Switch invalid key errors to RuntimeExceptions */
                 set_error_handler(array($this, 'throwException'));
                 $phar = new \Phar($this->getTempPharFile());
+                // check how the phar was signed and warn if not openssl
                 unset($phar);
                 restore_error_handler();
             } else {
@@ -277,7 +278,6 @@ class Updater
                     'The phar.readonly setting is %s. Unable to verify signature',
                     (string) ini_get('phar.readonly')
                 ));
-                // check how the phar was signed and warn if not openssl
             }
             if ($this->hasPubKey()) {
                 @unlink($this->getTempPubKeyFile());
