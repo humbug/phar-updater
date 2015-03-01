@@ -1,4 +1,4 @@
-phar Updater
+PHAR Updater
 ============
 
 You have a phar file to distribute, and it's all the rage to include a self-update
