@@ -31,12 +31,15 @@ other than the current one, and include this.
 /**
  * The simplest usage assumes the currently running phar is to be updated and
  * that it has been signed with a private key (using OpenSSL)
+ *
+ * The first constructor is the path to a phar if you are not updating the
+ * currently running phar.
  */
 
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
-$updater->setpharUrl('http://example.com/current.phar');
+$updater->setPharUrl('http://example.com/current.phar');
 $updater->setVersionUrl('http://example.com/current.version');
 try {
     $result = $updater->update();
@@ -57,7 +60,7 @@ If you are not signing the phar using OpenSSL:
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater(null, false);
-$updater->setpharUrl('http://example.com/current.phar');
+$updater->setPharUrl('http://example.com/current.phar');
 $updater->setVersionUrl('http://example.com/current.version');
 try {
     $result = $updater->update();
@@ -73,7 +76,7 @@ If you need version information:
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
-$updater->setpharUrl('http://example.com/current.phar');
+$updater->setPharUrl('http://example.com/current.phar');
 $updater->setVersionUrl('http://example.com/current.version');
 try {
     $result = $updater->update();
