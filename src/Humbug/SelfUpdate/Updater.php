@@ -262,22 +262,7 @@ class Updater
         }
 
         try {
-            if ($this->hasPubKey()) {
-                copy($this->getLocalPubKeyFile(), $this->getTempPubKeyFile());
-            }
-            chmod($this->getTempPharFile(), fileperms($this->getLocalPharFile()));
-            /** Switch invalid key errors to RuntimeExceptions */
-            set_error_handler(array($this, 'throwException'));
-            $phar = new \Phar($this->getTempPharFile());
-            $signature = $phar->getSignature();
-            if ($this->hasPubKey() && strtolower($signature['hash_type']) !== 'openssl') {
-                throw new RuntimeException('The downloaded phar file has no OpenSSL signature');
-            }
-            unset($phar);
-            restore_error_handler();
-            if ($this->hasPubKey()) {
-                @unlink($this->getTempPubKeyFile());
-            }
+            $this->validatePharDownload();
         } catch (\Exception $e) {
             restore_error_handler();
             $this->cleanupAfterError();
@@ -367,6 +352,26 @@ class Updater
             return true;
         }
         return false;
+    }
+
+    protected function validatePharDownload()
+    {
+        if ($this->hasPubKey()) {
+            copy($this->getLocalPubKeyFile(), $this->getTempPubKeyFile());
+        }
+        chmod($this->getTempPharFile(), fileperms($this->getLocalPharFile()));
+        /** Switch invalid key errors to RuntimeExceptions */
+        set_error_handler(array($this, 'throwException'));
+        $phar = new \Phar($this->getTempPharFile());
+        $signature = $phar->getSignature();
+        if ($this->hasPubKey() && strtolower($signature['hash_type']) !== 'openssl') {
+            throw new RuntimeException('The downloaded phar file has no OpenSSL signature');
+        }
+        unset($phar);
+        restore_error_handler();
+        if ($this->hasPubKey()) {
+            @unlink($this->getTempPubKeyFile());
+        }
     }
 
     protected function cleanupAfterError()
