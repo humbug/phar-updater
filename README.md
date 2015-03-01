@@ -34,8 +34,8 @@ other than the current one, and include this.
  * The simplest usage assumes the currently running phar is to be updated and
  * that it has been signed with a private key (using OpenSSL)
  *
- * The first constructor is the path to a phar if you are not updating the
- * currently running phar.
+ * The first constructor parameter is the path to a phar if you are not updating
+ * the currently running phar.
  */
 
 use Humbug\SelfUpdate\Updater;
