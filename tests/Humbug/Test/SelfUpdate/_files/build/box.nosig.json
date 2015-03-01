@@ -1,0 +1,9 @@
+{
+    "chmod": "0755",
+    "directories": [
+        "src/new"
+    ],
+    "main": "src/new/run.php",
+    "output": "nosig.phar",
+    "stub": true
+}

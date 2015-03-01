@@ -147,9 +147,9 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     /**
      * @runInSeparateProcess
      */
-    public function testUpdatePharFailsIfCurrentPublicKeyInvalid()
+    public function testUpdatePharFailsIfCurrentPublicKeyEmpty()
     {
-        $this->markTestSkipped('Segmentation fault at present under PHP');
+        //$this->markTestSkipped('Segmentation fault at present under PHP');
         copy($this->files . '/build/badkey.phar', $this->tmp . '/old.phar');
         chmod($this->tmp . '/old.phar', 0755);
         copy($this->files . '/build/badkey.phar.pubkey', $this->tmp . '/old.phar.pubkey');
@@ -158,15 +158,24 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $updater->setPharUrl('file://' . $this->files . '/build/new.phar');
         $updater->setVersionUrl('file://' . $this->files . '/build/new.version');
 
-        /** Invalid 'badkey' on original phar should generate an error (mapped to RuntimeException) */
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
+        $this->setExpectedException('UnexpectedValueException');
         $updater->update();
     }
 
     /**
      * @runInSeparateProcess
      */
-    public function testUpdatePharFailsOnSignatureMismatch()
+    public function testUpdatePharFailsIfCurrentPublicKeyInvalid()
+    {
+        $this->markTestIncomplete('Segmentation fault at present under PHP');
+        /** Should be similar to testUpdatePharFailsIfCurrentPublicKeyEmpty with
+            corrupt or truncated public key */
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testUpdatePharFailsOnExpectedSignatureMismatch()
     {
         copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
         chmod($this->tmp . '/old.phar', 0755);
@@ -179,6 +188,24 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $updater = new Updater($this->tmp . '/old.phar');
         $updater->setPharUrl('file://' . $this->files . '/build/badsig.phar');
         $updater->setVersionUrl('file://' . $this->files . '/build/badsig.version');
+        $updater->update();
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testUpdatePharFailsIfDownloadPharIsUnsignedWhenExpected()
+    {
+        copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
+        chmod($this->tmp . '/old.phar', 0755);
+        copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
+
+        $updater = new Updater($this->tmp . '/old.phar');
+        $updater->setPharUrl('file://' . $this->files . '/build/nosig.phar');
+        $updater->setVersionUrl('file://' . $this->files . '/build/nosig.version');
+
+        /** If newly download phar lacks an expected signature, an exception should be thrown */
+        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
         $updater->update();
     }
 

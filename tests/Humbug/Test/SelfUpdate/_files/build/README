@@ -1,0 +1,3 @@
+This directory contains phars generated from ./src used during testing.
+These are generated using the box json configuration files.
+Retained here should any changes be needed.

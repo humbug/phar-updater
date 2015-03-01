@@ -266,19 +266,15 @@ class Updater
                 copy($this->getLocalPubKeyFile(), $this->getTempPubKeyFile());
             }
             chmod($this->getTempPharFile(), fileperms($this->getLocalPharFile()));
-            if (!ini_get('phar.readonly')) {
-                /** Switch invalid key errors to RuntimeExceptions */
-                set_error_handler(array($this, 'throwException'));
-                $phar = new \Phar($this->getTempPharFile());
-                // check how the phar was signed and warn if not openssl
-                unset($phar);
-                restore_error_handler();
-            } else {
-                throw new RuntimeException(sprintf(
-                    'The phar.readonly setting is %s. Unable to verify signature',
-                    (string) ini_get('phar.readonly')
-                ));
+            /** Switch invalid key errors to RuntimeExceptions */
+            set_error_handler(array($this, 'throwException'));
+            $phar = new \Phar($this->getTempPharFile());
+            $signature = $phar->getSignature();
+            if ($this->hasPubKey() && strtolower($signature['hash_type']) !== 'openssl') {
+                throw new RuntimeException('The downloaded phar file has no OpenSSL signature');
             }
+            unset($phar);
+            restore_error_handler();
             if ($this->hasPubKey()) {
                 @unlink($this->getTempPubKeyFile());
             }
