@@ -39,9 +39,10 @@ $updater = new Updater();
 $updater->setpharUrl('http://example.com/current.phar');
 $updater->setVersionUrl('http://example.com/current.version');
 try {
-    $updater->update();
+    $result = $updater->update();
+    $result ? exit('Updated!') : exit('No update needed!');
 } catch (\Exception $e) {
-    die('Well, something happened! Either an oopsie or something involving hackers.');
+    exit('Well, something happened! Either an oopsie or something involving hackers.');
 }
 ```
 
@@ -59,9 +60,34 @@ $updater = new Updater(null, false);
 $updater->setpharUrl('http://example.com/current.phar');
 $updater->setVersionUrl('http://example.com/current.version');
 try {
-    $updater->update();
+    $result = $updater->update();
+    $result ? exit('Updated!') : exit('No update needed!');
 } catch (\Exception $e) {
-    die('Well, something happened! Either an oopsie or something involving hackers.');
+    exit('Well, something happened! Either an oopsie or something involving hackers.');
+}
+```
+
+If you need version information:
+
+```php
+use Humbug\SelfUpdate\Updater;
+
+$updater = new Updater();
+$updater->setpharUrl('http://example.com/current.phar');
+$updater->setVersionUrl('http://example.com/current.version');
+try {
+    $result = $updater->update();
+    if ($result) {
+        $new = $updater->getNewVersion();
+        $old = $updater->getOldVersion();
+        exit(sprintf(
+            'Updated from SHA-1 %s to SHA-1 %s', $old, $new
+        ))
+    } else {
+        exit('No update needed!')
+    }
+} catch (\Exception $e) {
+    exit('Well, something happened! Either an oopsie or something involving hackers.');
 }
 ```
 
