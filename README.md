@@ -3,8 +3,8 @@ PHAR Updater
 
 You have a phar file to distribute, and it's all the rage to include a self-update
 command. Do you really need to write that? Here at Humbug Central, our army of
-minions have written one for you with the following features (to which we'll add
-over time):
+minions (all ten of them) have written one for you with the following features
+(to which we'll add over time):
 
 * Full support for SSL/TLS verification so your users will not get their downloads
 replaced by cheeky people .
@@ -12,6 +12,8 @@ replaced by cheeky people .
 * Version checking (currently to latest SHA-1).
 * Simple API where it either updates or Exceptions will go wild.
 
+Development continues so...give it a whirl and complain loudly in the issues
+section if needed.
 
 Installation
 ============
