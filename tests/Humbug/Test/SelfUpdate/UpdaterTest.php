@@ -127,9 +127,13 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->updater->hasUpdate());
     }
 
-    public function testUpdatesPhar()
+    /**
+     * @runInSeparateProcess
+     */
+    public function testUpdatePhar()
     {
         copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
+        chmod($this->tmp . '/old.phar', 0755);
         copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
@@ -138,6 +142,25 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $updater->setVersionUrl('file://' . $this->files . '/build/new.version');
         $this->assertTrue($updater->update());
         $this->assertEquals('new', $this->getPharOutput($this->tmp . '/old.phar'));
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testUpdatePharFailsOnSignatureMismatch()
+    {
+        copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
+        chmod($this->tmp . '/old.phar', 0755);
+        copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
+        $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
+
+        /** Signature check should fail with invalid signature by a different privkey */
+        $this->setExpectedException('UnexpectedValueException');
+
+        $updater = new Updater($this->tmp . '/old.phar');
+        $updater->setPharUrl('file://' . $this->files . '/build/badsig.phar');
+        $updater->setVersionUrl('file://' . $this->files . '/build/badsig.version');
+        $updater->update();
     }
 
     /**

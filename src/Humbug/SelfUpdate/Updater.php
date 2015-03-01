@@ -78,6 +78,7 @@ class Updater
      */
     public function __construct($localPharFile = null, $hasPubKey = true)
     {
+        ini_set('phar.require_hash', 1);
         $this->setLocalPharFile($localPharFile);
         if (!is_bool($hasPubKey)) {
             throw new InvalidArgumentException(
@@ -191,6 +192,11 @@ class Updater
         return $this->oldVersion;
     }
 
+    public function throwException($errno, $errstr)
+    {
+        throw new RuntimeException($errstr);
+    }
+
     protected function hasPubKey()
     {
         return $this->hasPubKey;
@@ -257,17 +263,27 @@ class Updater
 
         try {
             if ($this->hasPubKey()) {
-                @copy($this->getLocalPubKeyFile(), $this->getTempPubKeyFile());
+                copy($this->getLocalPubKeyFile(), $this->getTempPubKeyFile());
             }
-            @chmod($this->getTempPharFile(), fileperms($this->getLocalPharFile()));
+            chmod($this->getTempPharFile(), fileperms($this->getLocalPharFile()));
             if (!ini_get('phar.readonly')) {
+                /** Switch invalid key errors to RuntimeExceptions */
+                set_error_handler(array($this, 'throwException'));
                 $phar = new \Phar($this->getTempPharFile());
                 unset($phar);
+                restore_error_handler();
+            } else {
+                throw new RuntimeException(sprintf(
+                    'The phar.readonly setting is %s. Unable to verify signature',
+                    (string) ini_get('phar.readonly')
+                ));
+                // check how the phar was signed and warn if not openssl
             }
             if ($this->hasPubKey()) {
                 @unlink($this->getTempPubKeyFile());
             }
         } catch (\Exception $e) {
+            restore_error_handler();
             $this->cleanupAfterError();
             throw $e;
         }
@@ -361,7 +377,7 @@ class Updater
     {
         @unlink($this->getBackupPharFile());
         @unlink($this->getTempPharFile());
-        @unlink($this->getTempPubKeyFile);
+        @unlink($this->getTempPubKeyFile());
     }
 
 }

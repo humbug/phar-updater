@@ -1,0 +1,10 @@
+{
+    "chmod": "0755",
+    "directories": [
+        "src/new"
+    ],
+    "main": "src/new/run.php",
+    "output": "badsig.phar",
+    "stub": true,
+    "key": "../privkey2.pem"
+}
