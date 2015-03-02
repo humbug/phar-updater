@@ -5,7 +5,7 @@
  * @category   Humbug
  * @package    Humbug
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
- * @license    https://github.com/padraic/humbug/blob/master/LICENSE New BSD License
+ * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
  *
  * This class is partially patterned after Composer's self-update.
  */
@@ -326,9 +326,9 @@ class Updater
         if ($result === false) {
             $this->cleanupAfterError();
             throw new FilesystemException(sprintf(
-                    'Unable to backup %s to %s.',
-                    $this->getLocalPharFile(),
-                    $this->getBackupPharFile()
+                'Unable to backup %s to %s.',
+                $this->getLocalPharFile(),
+                $this->getBackupPharFile()
             ));
         }
     }
@@ -345,10 +345,7 @@ class Updater
             ));
         }
 
-        file_put_contents(
-            $this->getTempPharFile(),
-            $result
-        );
+        file_put_contents($this->getTempPharFile(), $result);
 
         if (!file_exists($this->getTempPharFile())) {
             throw new FilesystemException(
@@ -419,17 +416,15 @@ class Updater
             $localPharFile = realpath($_SERVER['argv'][0]) ?: $_SERVER['argv'][0];
         }
         if (!file_exists($localPharFile)) {
-            throw new RuntimeException(
-                sprintf('The set phar file does not exist: %s.', $localPharFile)
-            );
+            throw new RuntimeException(sprintf(
+                'The set phar file does not exist: %s.', $localPharFile
+            ));
         }
         if (!is_writable($localPharFile)) {
-            throw new FilesystemException(
-                sprintf(
-                    'The current phar file is not writeable and cannot be replaced: %s.',
-                    $localPharFile
-                )
-            );
+            throw new FilesystemException(sprintf(
+                'The current phar file is not writeable and cannot be replaced: %s.',
+                $localPharFile
+            ));
         }
         $this->localPharFile = $localPharFile;
         $this->localPharFileBasename = basename($localPharFile, '.phar');
@@ -439,9 +434,9 @@ class Updater
     {
         $localPubKeyFile = $this->getLocalPharFile() . '.pubkey';
         if (!file_exists($localPubKeyFile)) {
-            throw new RuntimeException(
-                sprintf('The phar pubkey file does not exist: %s.', $localPubKeyFile)
-            );
+            throw new RuntimeException(sprintf(
+                'The phar pubkey file does not exist: %s.', $localPubKeyFile
+            ));
         }
         $this->localPubKeyFile = $localPubKeyFile;
     }
@@ -478,7 +473,9 @@ class Updater
         $phar = new \Phar($phar);
         $signature = $phar->getSignature();
         if ($this->hasPubKey() && strtolower($signature['hash_type']) !== 'openssl') {
-            throw new NoSignatureException('The downloaded phar file has no OpenSSL signature.');
+            throw new NoSignatureException(
+                'The downloaded phar file has no OpenSSL signature.'
+            );
         }
         unset($phar);
         restore_error_handler();
@@ -489,7 +486,7 @@ class Updater
 
     protected function cleanupAfterError()
     {
-        @unlink($this->getBackupPharFile());
+        //@unlink($this->getBackupPharFile());
         @unlink($this->getTempPharFile());
         @unlink($this->getTempPubKeyFile());
     }
