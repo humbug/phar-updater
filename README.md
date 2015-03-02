@@ -15,6 +15,8 @@ replaced by cheeky people .
 Development continues so...give it a whirl and complain loudly in the issues
 section if needed.
 
+[![Build Status](https://travis-ci.org/padraic/phar-updater.svg?branch=master)](https://travis-ci.org/padraic/phar-updater)
+
 Installation
 ============
 
