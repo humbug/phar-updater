@@ -104,7 +104,10 @@ You can trigger a rollback quite easily using this convention:
 ```php
 use Humbug\SelfUpdate\Updater;
 
-$updater = new Updater(null, false);
+/**
+ * Same constructor parameters as you would use for updating. Here, just defaults.
+ */
+$updater = new Updater();
 try {
     $result = $updater->rollback();
     $result ? exit('Success!') : exit('Failure!');
