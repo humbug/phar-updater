@@ -128,7 +128,7 @@ The Updater constructor is fairly simple. The three basic variations are:
 
 ```php
 /**
- * Update currently running phar which has been signed.
+ * Default: Update currently running phar which has been signed.
  */
 $updater = new Updater;
 ```
@@ -142,7 +142,7 @@ $updater = new Updater(null, false);
 
 ```php
 /**
- * Default: Update a different phar which has NOT been signed.
+ * Update a different phar which has NOT been signed.
  */
 $updater = new Updater('/path/to/impersonatephil.phar', false);
 ```
