@@ -98,6 +98,8 @@ try {
 }
 ```
 
+### Rollback Support
+
 The Updater automatically copies a backup of the original phar to myname-old.phar.
 You can trigger a rollback quite easily using this convention:
 
