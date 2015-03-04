@@ -122,6 +122,31 @@ from using the `setBackupPath()` function when updating a current phar or the
 `setRestorePath()` prior to triggering a rollback. These will be used instead
 of the simple built in convention.
 
+### Constructor Parameters
+
+The Updater constructor is fairly simple. The three basic variations are:
+
+```php
+/**
+ * Default: Update currently running phar which has been signed.
+ *.
+$updater = new Updater;
+```
+
+```php
+/**
+ * Default: Update currently running phar which has NOT been signed.
+ *.
+$updater = new Updater(null, false);
+```
+
+```php
+/**
+ * Default: Update a different phar which has NOT been signed.
+ *.
+$updater = new Updater('/path/to/impersonatephil.phar', false);
+```
+
 Update Strategies
 =================
 
