@@ -98,6 +98,27 @@ try {
 }
 ```
 
+The Updater automatically copies a backup of the original phar to myname-old.phar.
+You can trigger a rollback quite easily using this convention:
+
+```php
+use Humbug\SelfUpdate\Updater;
+
+$updater = new Updater(null, false);
+try {
+    $result = $updater->rollback();
+    $result ? exit('Success!') : exit('Failure!');
+} catch (\Exception $e) {
+    exit('Well, something happened! Either an oopsie or something involving hackers.');
+}
+```
+
+As users may have diverse requirements in naming and locating backups, you can
+explicitly manage the precise path to where a backup should be written, or read
+from using the `setBackupPath()` function when updating a current phar or the
+`setRestorePath()` prior to triggering a rollback. These will be used instead
+of the simple built in convention.
+
 Update Strategies
 =================
 
