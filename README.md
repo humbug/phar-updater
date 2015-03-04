@@ -128,14 +128,14 @@ The Updater constructor is fairly simple. The three basic variations are:
 
 ```php
 /**
- * Default: Update currently running phar which has been signed.
+ * Update currently running phar which has been signed.
  */
 $updater = new Updater;
 ```
 
 ```php
 /**
- * Default: Update currently running phar which has NOT been signed.
+ * Update currently running phar which has NOT been signed.
  */
 $updater = new Updater(null, false);
 ```
