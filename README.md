@@ -1,6 +1,8 @@
 PHAR Updater
 ============
 
+[![Build Status](https://travis-ci.org/padraic/phar-updater.svg?branch=master)](https://travis-ci.org/padraic/phar-updater)
+
 You have a phar file to distribute, and it's all the rage to include a self-update
 command. Do you really need to write that? Here at Humbug Central, our army of
 minions (all ten of them) have written one for you with the following features
@@ -14,8 +16,6 @@ replaced by cheeky people .
 
 Development continues so...give it a whirl and complain loudly in the issues
 section if needed.
-
-[![Build Status](https://travis-ci.org/padraic/phar-updater.svg?branch=master)](https://travis-ci.org/padraic/phar-updater)
 
 Installation
 ============

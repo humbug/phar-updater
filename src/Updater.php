@@ -78,6 +78,11 @@ class Updater
     protected $backupPath;
 
     /**
+     * @var string
+     */
+    protected $restorePath;
+
+    /**
      * @var bool
      */
     protected $newVersionAvailable;
@@ -208,23 +213,6 @@ class Updater
     }
 
     /**
-     * Set backup path for old phar versions
-     *
-     * @param string $url
-     */
-    public function setBackupPath($path)
-    {
-        $path = realpath(dirname($path));
-        if (!file_exists($path)) {
-            # code...
-        }
-        if (!is_writable($path)) {
-            # code...
-        }
-        $this->backupPath = $path;
-    }
-
-    /**
      * Get backup extension for old phar versions
      *
      * @return string
@@ -232,16 +220,6 @@ class Updater
     public function getBackupExtension()
     {
         return $this->backupExtension;
-    }
-
-    /**
-     * Get backup path for old phar versions
-     *
-     * @return string
-     */
-    public function getBackupPath()
-    {
-        return $this->backupPath;
     }
 
     public function getLocalPharFile()
@@ -272,6 +250,68 @@ class Updater
     public function getOldVersion()
     {
         return $this->oldVersion;
+    }
+
+    /**
+     * Set backup path for old phar versions
+     *
+     * @param string $url
+     */
+    public function setBackupPath($path)
+    {
+        $path = realpath(dirname($path));
+        if (!file_exists($path)) {
+            throw new FilesystemException(sprintf(
+                'The backup directory does not exist: %s.', $path
+            ));
+        }
+        if (!is_writable($path)) {
+            throw new FilesystemException(sprintf(
+                'The backup directory is not writeable: %s.', $path
+            ));
+        }
+        $this->backupPath = $path;
+    }
+
+    /**
+     * Get backup path for old phar versions
+     *
+     * @return string
+     */
+    public function getBackupPath()
+    {
+        return $this->backupPath;
+    }
+
+    /**
+     * Set path for the backup phar to rollback/restore from
+     *
+     * @param string $url
+     */
+    public function setRestorePath($path)
+    {
+        $path = realpath(dirname($path));
+        if (!file_exists($path)) {
+            throw new FilesystemException(sprintf(
+                'The restore phar does not exist: %s.', $path
+            ));
+        }
+        if (!is_readable($path)) {
+            throw new FilesystemException(sprintf(
+                'The restore file is not readable: %s.', $path
+            ));
+        }
+        $this->restorePath = $path;
+    }
+
+    /**
+     * Get path for the backup phar to rollback/restore from
+     *
+     * @return string
+     */
+    public function getRestorePath()
+    {
+        return $this->restorePath;
     }
 
     public function throwRuntimeException($errno, $errstr)
@@ -379,13 +419,32 @@ class Updater
 
     protected function restorePhar()
     {
-        // get backup
+        $backup = $this->getRestorePharFile();
+        if (!file_exists($backup)) {
+            throw new RuntimeException(sprintf(
+                'The backup file does not exist: %s.', $backup
+            ));
+        }
         $this->validatePhar($backup);
-        rename($backup, $this->getLocalPharFile());
+        return rename($backup, $this->getLocalPharFile());
     }
 
     protected function getBackupPharFile()
     {
+        if (null !== $this->getBackupPath()) {
+            return $this->getBackupPath();
+        }
+        return $this->getTempDirectory()
+            . '/'
+            . sprintf('%s.%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
+        );
+    }
+
+    protected function getRestorePharFile()
+    {
+        if (null !== $this->getRestorePath()) {
+            return $this->getRestorePath();
+        }
         return $this->getTempDirectory()
             . '/'
             . sprintf('%s.%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
