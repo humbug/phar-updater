@@ -436,7 +436,7 @@ class Updater
         }
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s.%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
+            . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
         );
     }
 
@@ -447,7 +447,7 @@ class Updater
         }
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s.%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
+            . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
         );
     }
 
