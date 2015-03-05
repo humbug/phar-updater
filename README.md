@@ -9,7 +9,7 @@ minions (all ten of them) have written one for you with the following features
 (to which we'll add over time):
 
 * Full support for SSL/TLS verification so your users will not get their downloads
-replaced by cheeky people .
+replaced by cheeky people.
 * Support for OpenSSL phar signatures.
 * Version checking (currently to latest SHA-1).
 * Simple API where it either updates or Exceptions will go wild.
@@ -89,7 +89,7 @@ try {
         $old = $updater->getOldVersion();
         exit(sprintf(
             'Updated from SHA-1 %s to SHA-1 %s', $old, $new
-        ))
+        ));
     } else {
         exit('No update needed!')
     }
