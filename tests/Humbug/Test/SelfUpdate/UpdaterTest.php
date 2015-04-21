@@ -22,8 +22,6 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     private $tmp;
 
-    private $phars = [];
-
     public function setup()
     {
         $this->tmp = sys_get_temp_dir();
