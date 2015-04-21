@@ -130,7 +130,7 @@ class Updater
     public function update()
     {
         if ($this->newVersionAvailable === false
-        || !is_bool($this->newVersionAvailable) && !$this->hasUpdate()) {
+        || (!is_bool($this->newVersionAvailable) && !$this->hasUpdate())) {
             return false;
         }
         $this->backupPhar();
