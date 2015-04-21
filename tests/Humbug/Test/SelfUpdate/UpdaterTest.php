@@ -22,7 +22,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     private $tmp;
 
-    private $phars = array();
+    private $phars = [];
 
     public function setup()
     {
@@ -196,10 +196,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdatePharFailsIfDownloadPharIsUnsignedWhenExpected()
     {
-        copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
-        chmod($this->tmp . '/old.phar', 0755);
-        copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
-
+        $this->createTestPharAndKey();
         $updater = new Updater($this->tmp . '/old.phar');
         $updater->setPharUrl('file://' . $this->files . '/build/nosig.phar');
         $updater->setVersionUrl('file://' . $this->files . '/build/nosig.version');
@@ -207,6 +204,15 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         /** If newly download phar lacks an expected signature, an exception should be thrown */
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
         $updater->update();
+    }
+
+    public function testSetBackupPathSetsThePathWhenTheDirectoryExistsAndIsWriteable()
+    {
+        $this->createTestPharAndKey();
+        $updater = new Updater($this->tmp . '/old.phar');
+        $updater->setBackupPath($this->tmp . '/backup.phar');
+        $res = $updater->getBackupPath();
+        $this->assertEquals($this->tmp . '/backup.phar', $res);
     }
 
     /**
@@ -224,5 +230,14 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         @unlink($this->tmp . '/old.phar.pubkey');
         @unlink($this->tmp . '/old.1c7049180abee67826d35ce308c38272242b64b8.phar');
     }
-    
+
+    private function createTestPharAndKey()
+    {
+        copy($this->files.'/build/old.phar', $this->tmp.'/old.phar');
+        chmod($this->tmp.'/old.phar', 0755);
+        copy(
+            $this->files.'/build/old.phar.pubkey',
+            $this->tmp.'/old.phar.pubkey'
+        );
+    }
 }

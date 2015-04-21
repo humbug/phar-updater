@@ -31,7 +31,7 @@ class Updater
      * @var string
      */
     protected $localPharFileBasename;
-    
+
     /**
      * @var string
      */
@@ -254,12 +254,12 @@ class Updater
     /**
      * Set backup path for old phar versions
      *
-     * @param string $url
+     * @param string $filePath
      */
-    public function setBackupPath($path)
+    public function setBackupPath($filePath)
     {
-        $path = realpath(dirname($path));
-        if (!file_exists($path)) {
+        $path = realpath(dirname($filePath));
+        if (!is_dir($path)) {
             throw new FilesystemException(sprintf(
                 'The backup directory does not exist: %s.', $path
             ));
@@ -269,7 +269,7 @@ class Updater
                 'The backup directory is not writeable: %s.', $path
             ));
         }
-        $this->backupPath = $path;
+        $this->backupPath = $filePath;
     }
 
     /**
@@ -285,7 +285,7 @@ class Updater
     /**
      * Set path for the backup phar to rollback/restore from
      *
-     * @param string $url
+     * @param string $path
      */
     public function setRestorePath($path)
     {
