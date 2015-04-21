@@ -160,8 +160,7 @@ loading of some event classes will have this impact.
 The solution is to disable or remove the dispatcher for your self-update command.
 
 In general, when writing your self-update CLI commands, either pre-load any classes
-likely needed prior to updating, or disable their loading if not essential. You can
-usually determine
+likely needed prior to updating, or disable their loading if not essential.
 
 Update Strategies
 =================
