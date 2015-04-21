@@ -17,10 +17,20 @@ use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\FilesystemException;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\NoSignatureException;
+use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use Symfony\Component\Finder\Finder;
 
 class Updater
 {
+
+    const STRATEGY_SHA1 = 'sha1';
+
+    const STRATEGY_GITHUB = 'github';
+
+    /**
+     * @var Humbug\SelfUpdate\Strategy\AbstractStrategy
+     */
+    protected $strategy;
 
     /**
      * @var string
@@ -93,7 +103,7 @@ class Updater
      * @param string $localPharFile
      * @param bool $hasPubKey
      */
-    public function __construct($localPharFile = null, $hasPubKey = true)
+    public function __construct($localPharFile = null, $hasPubKey = true, $strategy = self::STRATEGY_SHA1)
     {
         ini_set('phar.require_hash', 1);
         $this->setLocalPharFile($localPharFile);
@@ -108,6 +118,7 @@ class Updater
             $this->setLocalPubKeyFile();
         }
         $this->setTempDirectory();
+        $this->setStrategy($strategy);
     }
 
     /**
@@ -149,6 +160,21 @@ class Updater
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param string $strategy
+     */
+    public function setStrategy($strategy)
+    {
+        switch ($strategy) {
+            case self::STRATEGY_GITHUB:
+                break;
+            
+            default:
+                $this->strategy = new ShaStrategy;
+                break;
+        }
     }
 
     /**
@@ -241,6 +267,13 @@ class Updater
         return $this->tempDirectory;
     }
 
+    public function getTempPharFile()
+    {
+        return $this->getTempDirectory()
+            . '/'
+            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
+    }
+
     public function getNewVersion()
     {
         return $this->newVersion;
@@ -330,27 +363,7 @@ class Updater
 
     protected function newVersionAvailable()
     {
-        /** Switch remote request errors to HttpRequestExceptions */
-        set_error_handler(array($this, 'throwHttpRequestException'));
-        $version = humbug_get_contents($this->getVersionUrl());
-        restore_error_handler();
-        if (false === $version) {
-            throw new HttpRequestException(sprintf(
-                'Request to URL failed: %s', $this->getVersionUrl()
-            ));
-        }
-        if (empty($version)) {
-            throw new HttpRequestException(
-                'Version request returned empty response.'
-            );
-        }
-        if (!preg_match('%^[a-z0-9]{40}%', $version, $matches)) {
-            throw new HttpRequestException(
-                'Version request returned incorrectly formatted response.'
-            );
-        }
-
-        $this->newVersion = $matches[0];
+        $this->newVersion = $this->strategy->getCurrentVersionAvailable($this);
         $this->oldVersion = sha1_file($this->getLocalPharFile());
 
         if ($this->newVersion !== $this->oldVersion) {
@@ -374,17 +387,7 @@ class Updater
 
     protected function downloadPhar()
     {
-        /** Switch remote request errors to HttpRequestExceptions */
-        set_error_handler(array($this, 'throwHttpRequestException'));
-        $result = humbug_get_contents($this->getPharUrl());
-        restore_error_handler();
-        if (false === $result) {
-            throw new HttpRequestException(sprintf(
-                'Request to URL failed: %s', $this->getPharUrl()
-            ));
-        }
-
-        file_put_contents($this->getTempPharFile(), $result);
+        $this->strategy->download($this);
 
         if (!file_exists($this->getTempPharFile())) {
             throw new FilesystemException(
@@ -447,13 +450,6 @@ class Updater
             . '/'
             . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
         );
-    }
-
-    protected function getTempPharFile()
-    {
-        return $this->getTempDirectory()
-            . '/'
-            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
     }
 
     protected function getTempPubKeyFile()
