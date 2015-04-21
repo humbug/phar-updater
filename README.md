@@ -149,6 +149,20 @@ $updater = new Updater(null, false);
 $updater = new Updater('/path/to/impersonatephil.phar', false);
 ```
 
+### Symfony Console Events (Avoid Post Update File Includes)
+
+Updating a currently running phar is made trickier since, once replaced, attempts
+to load files from it within a process originating from an older phar is likely
+to create an `internal corruption of phar` error. For example, if you're using
+Symfony Console and have created an event dispatcher for your commands, the lazy
+loading of some event classes will have this impact.
+
+The solution is to disable or remove the dispatcher for your self-update command.
+
+In general, when writing your self-update CLI commands, either pre-load any classes
+likely needed prior to updating, or disable their loading if not essential. You can
+usually determine
+
 Update Strategies
 =================
 
