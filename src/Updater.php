@@ -170,7 +170,7 @@ class Updater
         switch ($strategy) {
             case self::STRATEGY_GITHUB:
                 break;
-            
+
             default:
                 $this->strategy = new ShaStrategy;
                 break;
@@ -449,14 +449,6 @@ class Updater
         return $this->getTempDirectory()
             . '/'
             . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
-        );
-    }
-
-    protected function getTempPharFile()
-    {
-        return $this->getTempDirectory()
-            . '/'
-            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename()
         );
     }
 
