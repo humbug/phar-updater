@@ -204,7 +204,7 @@ class Updater
     /**
      * Set backup extension for old phar versions
      *
-     * @param string $url
+     * @param string $extension
      */
     public function setBackupExtension($extension)
     {
@@ -254,7 +254,7 @@ class Updater
     /**
      * Set backup path for old phar versions
      *
-     * @param string $url
+     * @param string $path
      */
     public function setBackupPath($path)
     {
@@ -285,7 +285,7 @@ class Updater
     /**
      * Set path for the backup phar to rollback/restore from
      *
-     * @param string $url
+     * @param string $path
      */
     public function setRestorePath($path)
     {
@@ -435,8 +435,7 @@ class Updater
         }
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
-        );
+            . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension());
     }
 
     protected function getRestorePharFile()
@@ -454,16 +453,14 @@ class Updater
     {
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename()
-        );
+            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
     }
 
     protected function getTempPubKeyFile()
     {
         return $this->getTempDirectory()
             . '/'
-            . sprintf('%s.phar.temp.pubkey', $this->getLocalPharFileBasename()
-        );
+            . sprintf('%s.phar.temp.pubkey', $this->getLocalPharFileBasename());
     }
 
     protected function setLocalPharFile($localPharFile)
@@ -535,11 +532,11 @@ class Updater
                 'The downloaded phar file has no OpenSSL signature.'
             );
         }
-        unset($phar);
         restore_error_handler();
         if ($this->hasPubKey()) {
             @unlink($phar . '.pubkey');
         }
+        unset($phar);
     }
 
     protected function cleanupAfterError()
