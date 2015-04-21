@@ -107,7 +107,6 @@ class Updater
         if ($this->hasPubKey) {
             $this->setLocalPubKeyFile();
         }
-        $this->hasPubKey = $hasPubKey;
         $this->setTempDirectory();
     }
 
