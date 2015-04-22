@@ -41,7 +41,7 @@ class Updater
      * @var string
      */
     protected $localPharFileBasename;
-    
+
     /**
      * @var string
      */
@@ -170,7 +170,7 @@ class Updater
         switch ($strategy) {
             case self::STRATEGY_GITHUB:
                 break;
-            
+
             default:
                 $this->strategy = new ShaStrategy;
                 break;
@@ -287,12 +287,12 @@ class Updater
     /**
      * Set backup path for old phar versions
      *
-     * @param string $path
+     * @param string $filePath
      */
-    public function setBackupPath($path)
+    public function setBackupPath($filePath)
     {
-        $path = realpath(dirname($path));
-        if (!file_exists($path)) {
+        $path = realpath(dirname($filePath));
+        if (!is_dir($path)) {
             throw new FilesystemException(sprintf(
                 'The backup directory does not exist: %s.', $path
             ));
@@ -302,7 +302,7 @@ class Updater
                 'The backup directory is not writeable: %s.', $path
             ));
         }
-        $this->backupPath = $path;
+        $this->backupPath = $filePath;
     }
 
     /**
