@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": ">=5.3",
-        "padraic/humbug_get_contents": "1.0.1",
+        "padraic/humbug_get_contents": "^1.0",
         "symfony/finder": "~2.2"
     },
     "require-dev": {
