@@ -144,6 +144,13 @@ $updater = new Updater(null, false);
 
 ```php
 /**
+ * Use a strategy other than the default SHA Hash.
+ */
+$updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
+```
+
+```php
+/**
  * Update a different phar which has NOT been signed.
  */
 $updater = new Updater('/path/to/impersonatephil.phar', false);
@@ -170,10 +177,11 @@ SHA-1 Hash Synchronisation
 
 The phar-updater package only (that will change!) supports an update strategy
 where phars are updated according to the SHA-1 hash of the current phar file
-available remotely. This assumes the existence of only two files:
+available remotely. This assumes the existence of only two to three remote files:
 
 * myname.phar
 * myname.version
+* myname.phar.pubkey (optional)
 
 The `myname.phar` is the most recently built phar.
 
@@ -186,9 +194,17 @@ sha1sum myname.phar > myname.version
 ```
 
 Remember to regenerate the version file for each new phar build you want to distribute.
+Using `sha1sum` adds additional data after the hash, but it's fine since the hash is
+the first string in the file which is the only requirement.
 
 If using OpenSSL signing, which is very much recommended, you can also put the
 public key online as `myname.phar.pubkey`, for the initial installation of your
-phar. However, please note that phar-updater will never download this key, will
+phar. However, please note that phar-updater itself will never download this key, will
 never replace this key on your filesystem, and will never install a phar whose
 signature cannot be verified by the locally cached public key.
+
+If you need to switch keys for any reason whatsoever, users will need to manually
+download a new phar along with the new key. While that sounds extreme, it's generally
+not a good idea to allow for arbitrary key changes that occur without user knowledge.
+The openssl signing has no mechanism such as a central authority or a browser's trusted
+certificate stash with which to automate such key changes in a safe manner.
