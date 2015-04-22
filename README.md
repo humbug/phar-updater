@@ -25,6 +25,11 @@ require: {
    "padraic/phar-updater": "~1.0@dev"
 }
 ```
+
+The package utilises PHP Streams for remote requests so it will require the openssl
+extension and the `allow_url_open` setting to both be enabled. Support for curl
+will follow in time.
+
 Usage
 =====
 
