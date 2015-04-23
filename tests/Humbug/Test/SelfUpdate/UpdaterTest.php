@@ -18,6 +18,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     private $files;
 
+    /** @var Updater */
     private $updater;
 
     private $tmp;
@@ -130,9 +131,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdatePhar()
     {
-        copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
-        chmod($this->tmp . '/old.phar', 0755);
-        copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
+        $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
         $updater = new Updater($this->tmp . '/old.phar');
@@ -175,9 +174,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdatePharFailsOnExpectedSignatureMismatch()
     {
-        copy($this->files . '/build/old.phar', $this->tmp . '/old.phar');
-        chmod($this->tmp . '/old.phar', 0755);
-        copy($this->files . '/build/old.phar.pubkey', $this->tmp . '/old.phar.pubkey');
+        $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
         /** Signature check should fail with invalid signature by a different privkey */
@@ -210,6 +207,15 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $updater = new Updater($this->tmp . '/old.phar');
         $updater->setBackupPath($this->tmp . '/backup.phar');
         $res = $updater->getBackupPath();
+        $this->assertEquals($this->tmp . '/backup.phar', $res);
+    }
+
+    public function testSetRestorePathSetsThePathWhenTheDirectoryExistsAndIsWriteable()
+    {
+        $this->createTestPharAndKey();
+        $updater = new Updater($this->tmp . '/old.phar');
+        $updater->setRestorePath($this->tmp . '/backup.phar');
+        $res = $updater->getRestorePath();
         $this->assertEquals($this->tmp . '/backup.phar', $res);
     }
 
