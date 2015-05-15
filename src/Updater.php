@@ -318,11 +318,11 @@ class Updater
     /**
      * Set path for the backup phar to rollback/restore from
      *
-     * @param string $path
+     * @param string $filePath
      */
-    public function setRestorePath($path)
+    public function setRestorePath($filePath)
     {
-        $path = realpath(dirname($path));
+        $path = realpath(dirname($filePath));
         if (!file_exists($path)) {
             throw new FilesystemException(sprintf(
                 'The restore phar does not exist: %s.', $path
@@ -333,7 +333,7 @@ class Updater
                 'The restore file is not readable: %s.', $path
             ));
         }
-        $this->restorePath = $path;
+        $this->restorePath = $filePath;
     }
 
     /**
