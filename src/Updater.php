@@ -55,11 +55,6 @@ class Updater
     /**
      * @var string
      */
-    protected $packageName;
-
-    /**
-     * @var string
-     */
     protected $tempDirectory;
 
     /**
@@ -175,26 +170,6 @@ class Updater
     public function getStrategy()
     {
         return $this->strategy;
-    }
-
-    /**
-     * Set package name (if any)
-     *
-     * @param string $name
-     */
-    public function setPackageName($name)
-    {
-        $this->packageName = $name;
-    }
-
-    /**
-     * Get package name (if any)
-     *
-     * @return string
-     */
-    public function getPackageName()
-    {
-        return $this->packageName;
     }
 
     /**

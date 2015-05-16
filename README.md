@@ -33,13 +33,20 @@ will follow in time.
 Usage
 =====
 
+The default update strategy uses an SHA-1 hash of the current remote phar in a
+version file, and will update the local phar when this version is changed. There
+is also a Github strategy which tracks Github Releases where you can upload a
+new phar file for a release.
+
+### Basic SHA-1 Strategy
+
 Create your self-update command, or even an update command for some other phar
 other than the current one, and include this.
 
 ```php
 /**
  * The simplest usage assumes the currently running phar is to be updated and
- * that it has been signed with a private key (using OpenSSL)
+ * that it has been signed with a private key (using OpenSSL).
  *
  * The first constructor parameter is the path to a phar if you are not updating
  * the currently running phar.
@@ -48,8 +55,8 @@ other than the current one, and include this.
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
-$updater->setPharUrl('http://example.com/current.phar');
-$updater->setVersionUrl('http://example.com/current.version');
+$updater->getStrategy()->setPharUrl('http://example.com/current.phar');
+$updater->getStrategy()->setVersionUrl('http://example.com/current.version');
 try {
     $result = $updater->update();
     $result ? exit('Updated!') : exit('No update needed!');
@@ -69,8 +76,8 @@ If you are not signing the phar using OpenSSL:
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater(null, false);
-$updater->setPharUrl('http://example.com/current.phar');
-$updater->setVersionUrl('http://example.com/current.version');
+$updater->getStrategy()->setPharUrl('http://example.com/current.phar');
+$updater->getStrategy()->setVersionUrl('http://example.com/current.version');
 try {
     $result = $updater->update();
     $result ? exit('Updated!') : exit('No update needed!');
@@ -85,8 +92,8 @@ If you need version information:
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
-$updater->setPharUrl('http://example.com/current.phar');
-$updater->setVersionUrl('http://example.com/current.version');
+$updater->getStrategy()->setPharUrl('http://example.com/current.phar');
+$updater->getStrategy()->setVersionUrl('http://example.com/current.version');
 try {
     $result = $updater->update();
     if ($result) {
@@ -102,6 +109,42 @@ try {
     exit('Well, something happened! Either an oopsie or something involving hackers.');
 }
 ```
+
+See the Update Strategies section for an overview of how to setup the SHA-1
+strategy. It's a simple to maintain choice for development or nightly versions of
+phars which are released to a specific numbered version.
+
+### Github Release Strategy
+
+Beyond devleopment or nightly phars, if you are released numbered versions on
+Github (i.e. tags), you can upload additional files (such as phars) to include in
+the Github Release.
+
+```php
+/**
+ * Other than somewhat different setters for the strategy, all other operations
+ * are identical.
+ */
+
+use Humbug\SelfUpdate\Updater;
+
+$updater = new Updater();
+$updater->setStrategy(Updater::STRATEGY_GITHUB);
+$updater->getStrategy()->setPharName('myapp.phar');
+$updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
+try {
+    $result = $updater->update();
+    $result ? exit('Updated!') : exit('No update needed!');
+} catch (\Exception $e) {
+    exit('Well, something happened! Either an oopsie or something involving hackers.');
+}
+```
+
+It's left to the implementation to supply the current release version associated
+with the local phar. This needs to be stored within the phar and should match
+the version string used by Github. This can follow any standard practice with
+recognisable pre- and postfixes, e.g.
+`v1.0.3`, `1.0.3`, `1.1`, `1.3rc`, `1.3.2pl2`.
 
 ### Rollback Support
 

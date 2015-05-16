@@ -28,6 +28,21 @@ class GithubStrategy extends AbstractStrategy
     private $localVersion;
 
     /**
+     * @var string
+     */
+    private $remoteVersion;
+
+    /**
+     * @var string
+     */
+    private $remoteUrl;
+
+    /**
+     * @var string
+     */
+    private $pharName;
+
+    /**
      * Download the remote Phar file.
      *
      * @param Updated $updater
@@ -37,11 +52,11 @@ class GithubStrategy extends AbstractStrategy
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $result = humbug_get_contents($updater->getPharUrl());
+        $result = humbug_get_contents($this->getDownloadUrl());
         restore_error_handler();
         if (false === $result) {
             throw new HttpRequestException(sprintf(
-                'Request to URL failed: %s', $updater->getPharUrl()
+                'Request to URL failed: %s', $this->getDownloadUrl()
             ));
         }
 
@@ -66,8 +81,11 @@ class GithubStrategy extends AbstractStrategy
 
         $versions = array_keys($package['package']['versions']);
         $versionParser = new VersionParser($version);
+        $this->remoteVersion = $versionParser->getMostRecentStable();
 
-        return $versionParser->getMostRecentStable();
+        $this->remoteUrl = $this->getDownloadUrl($package)
+
+        return $this->remoteVersion;
     }
 
     /**
@@ -91,8 +109,38 @@ class GithubStrategy extends AbstractStrategy
         $this->localVersion = $version;
     }
 
-    protected function getDownloadUrl(Updater $updater)
+    /**
+     * Set phar file's name
+     *
+     * @param string $name
+     */
+    public function setPharName($name)
     {
-        // get link from package data
+        $this->pharName = $name;
+    }
+
+    /**
+     * Get phar file's name
+     *
+     * @return string
+     */
+    public function getPharName()
+    {
+        return $this->pharName;
+    }
+
+    protected function getDownloadUrl(array $package)
+    {
+        $baseUrl = preg_replace(
+            '{\.git$}',
+            '',
+            $package['package']['versions'][$this->remoteVersion]['source']['url']
+        );
+        $downloadUrl = sprintf(
+            '%s/releases/download/%s/%s',
+            $baseUrl,
+            $this->remoteVersion,
+            $this->getPharName()
+        );
     }
 }
