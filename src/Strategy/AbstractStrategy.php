@@ -21,4 +21,5 @@ abstract class AbstractStrategy
 
     abstract public function getCurrentVersionAvailable(Updater $updater);
 
+    abstract public function getThisVersion(Updater $updater);
 }

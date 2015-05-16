@@ -58,4 +58,8 @@ class ShaStrategy extends AbstractStrategy
         return $matches[0];
     }
 
+    public function getThisVersion(Updater $updater)
+    {
+        return sha1_file($updater->getLocalPharFile());
+    }
 }

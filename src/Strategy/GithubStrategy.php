@@ -13,12 +13,13 @@
 namespace Humbug\SelfUpdate\Strategy;
 
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\VersionParser;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 
 class GithubStrategy extends AbstractStrategy
 {
 
-    const API_URL = 'https://api.github.com/';
+    const API_URL = 'https://packagist.org/packages/%s.json';
 
     public function download(Updater $updater)
     {
@@ -39,29 +40,25 @@ class GithubStrategy extends AbstractStrategy
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-
-
-        $version = humbug_get_contents($updater->getVersionUrl());
-
-        
+        $packageUrl = sprintf(self::API_URL, $updater->getPackageName());
+        $package = json_decode(humbug_get_contents($packageUrl), true);
         restore_error_handler();
-        if (false === $version) {
-            throw new HttpRequestException(sprintf(
-                'Request to URL failed: %s', $updater->getVersionUrl()
-            ));
-        }
-        if (empty($version)) {
-            throw new HttpRequestException(
-                'Version request returned empty response.'
-            );
-        }
-        if (!preg_match('%^[a-z0-9]{40}%', $version, $matches)) {
-            throw new HttpRequestException(
-                'Version request returned incorrectly formatted response.'
-            );
-        }
 
-        return $matches[0];
+        // check json errors
+
+        $versions = array_keys($package['package']['versions']);
+        $versionParser = new VersionParser($version);
+
+        return $versionParser->getMostRecentStable();
     }
 
+    public function getThisVersion(Updater $updater)
+    {
+        return;
+    }
+
+    protected function getDownloadUrl(Updater $updater)
+    {
+        // get link from package data
+    }
 }

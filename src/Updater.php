@@ -65,6 +65,11 @@ class Updater
     /**
      * @var string
      */
+    protected $packageName;
+
+    /**
+     * @var string
+     */
     protected $tempDirectory;
 
     /**
@@ -228,6 +233,26 @@ class Updater
     }
 
     /**
+     * Set package name (if any)
+     *
+     * @param string $name
+     */
+    public function setPackageName($name)
+    {
+        $this->packageName = $name;
+    }
+
+    /**
+     * Get package name (if any)
+     *
+     * @return string
+     */
+    public function getPackageName()
+    {
+        return $this->packageName;
+    }
+
+    /**
      * Set backup extension for old phar versions
      *
      * @param string $extension
@@ -364,7 +389,7 @@ class Updater
     protected function newVersionAvailable()
     {
         $this->newVersion = $this->strategy->getCurrentVersionAvailable($this);
-        $this->oldVersion = sha1_file($this->getLocalPharFile());
+        $this->oldVersion = $this->strategy->getThisVersion($this);
 
         if ($this->newVersion !== $this->oldVersion) {
             return true;
@@ -541,5 +566,4 @@ class Updater
         @unlink($this->getTempPharFile());
         @unlink($this->getTempPubKeyFile());
     }
-
 }
