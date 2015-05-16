@@ -17,9 +17,27 @@ use Humbug\SelfUpdate\Updater;
 abstract class AbstractStrategy
 {
 
+    /**
+     * Download the remote Phar file.
+     *
+     * @param Updated $updater
+     * @return void
+     */
     abstract public function download(Updater $updater);
 
-    abstract public function getCurrentVersionAvailable(Updater $updater);
+    /**
+     * Retrieve the current version available remotely.
+     *
+     * @param Updated $updater
+     * @return void
+     */
+    abstract public function getCurrentRemoteVersion(Updater $updater);
 
-    abstract public function getThisVersion(Updater $updater);
+    /**
+     * Retrieve the current version of the local phar file.
+     *
+     * @param Updated $updater
+     * @return void
+     */
+    abstract public function getCurrentLocalVersion(Updater $updater);
 }

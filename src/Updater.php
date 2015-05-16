@@ -55,16 +55,6 @@ class Updater
     /**
      * @var string
      */
-    protected $pharUrl;
-
-    /**
-     * @var string
-     */
-    protected $versionUrl;
-
-    /**
-     * @var string
-     */
     protected $packageName;
 
     /**
@@ -182,54 +172,9 @@ class Updater
         }
     }
 
-    /**
-     * Set URL to phar file
-     *
-     * @param string $url
-     */
-    public function setPharUrl($url)
+    public function getStrategy()
     {
-        if (!$this->validateAllowedUrl($url)) {
-            throw new InvalidArgumentException(
-                sprintf('Invalid url passed as argument: %s.', $url)
-            );
-        }
-        $this->pharUrl = $url;
-    }
-
-    /**
-     * Get URL for phar file
-     *
-     * @return string
-     */
-    public function getPharUrl()
-    {
-        return $this->pharUrl;
-    }
-
-    /**
-     * Set URL to version file
-     *
-     * @param string $url
-     */
-    public function setVersionUrl($url)
-    {
-        if (!$this->validateAllowedUrl($url)) {
-            throw new InvalidArgumentException(
-                sprintf('Invalid url passed as argument: %s.', $url)
-            );
-        }
-        $this->versionUrl = $url;
-    }
-
-    /**
-     * Get URL for version file
-     *
-     * @return string
-     */
-    public function getVersionUrl()
-    {
-        return $this->versionUrl;
+        return $this->strategy;
     }
 
     /**
@@ -388,8 +333,8 @@ class Updater
 
     protected function newVersionAvailable()
     {
-        $this->newVersion = $this->strategy->getCurrentVersionAvailable($this);
-        $this->oldVersion = $this->strategy->getThisVersion($this);
+        $this->newVersion = $this->strategy->getCurrentRemoteVersion($this);
+        $this->oldVersion = $this->strategy->getCurrentLocalVersion($this);
 
         if ($this->newVersion !== $this->oldVersion) {
             return true;
@@ -526,15 +471,6 @@ class Updater
             ));
         }
         $this->tempDirectory = $tempDirectory;
-    }
-
-    protected function validateAllowedUrl($url)
-    {
-        if (filter_var($url, FILTER_VALIDATE_URL)
-        && in_array(parse_url($url, PHP_URL_SCHEME), array('http', 'https', 'file'))) {
-            return true;
-        }
-        return false;
     }
 
     protected function validatePhar($phar)

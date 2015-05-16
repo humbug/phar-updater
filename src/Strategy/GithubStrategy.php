@@ -15,12 +15,24 @@ namespace Humbug\SelfUpdate\Strategy;
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\VersionParser;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
+use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 
 class GithubStrategy extends AbstractStrategy
 {
 
     const API_URL = 'https://packagist.org/packages/%s.json';
 
+    /**
+     * @var string
+     */
+    private $localVersion;
+
+    /**
+     * Download the remote Phar file.
+     *
+     * @param Updated $updater
+     * @return void
+     */
     public function download(Updater $updater)
     {
         /** Switch remote request errors to HttpRequestExceptions */
@@ -36,7 +48,13 @@ class GithubStrategy extends AbstractStrategy
         file_put_contents($updater->getTempPharFile(), $result);
     }
 
-    public function getCurrentVersionAvailable(Updater $updater)
+    /**
+     * Retrieve the current version available remotely.
+     *
+     * @param Updated $updater
+     * @return void
+     */
+    public function getCurrentRemoteVersion(Updater $updater)
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
@@ -52,9 +70,25 @@ class GithubStrategy extends AbstractStrategy
         return $versionParser->getMostRecentStable();
     }
 
-    public function getThisVersion(Updater $updater)
+    /**
+     * Retrieve the current version of the local phar file.
+     *
+     * @param Updated $updater
+     * @return void
+     */
+    public function getCurrentLocalVersion(Updater $updater)
     {
-        return;
+        return $this->localVersion;
+    }
+
+    /**
+     * Set version string of the local phar
+     *
+     * @param string $version
+     */
+    public function setCurrentLocalVersion($version)
+    {
+        $this->localVersion = $version;
     }
 
     protected function getDownloadUrl(Updater $updater)

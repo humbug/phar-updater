@@ -70,37 +70,37 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testSetPharUrlWithUrl()
     {
-        $this->updater->setPharUrl('http://www.example.com');
-        $this->assertEquals($this->updater->getPharUrl(), 'http://www.example.com');
+        $this->updater->getStrategy()->setPharUrl('http://www.example.com');
+        $this->assertEquals($this->updater->getStrategy()->getPharUrl(), 'http://www.example.com');
 
-        $this->updater->setPharUrl('https://www.example.com');
-        $this->assertEquals($this->updater->getPharUrl(), 'https://www.example.com');
+        $this->updater->getStrategy()->setPharUrl('https://www.example.com');
+        $this->assertEquals($this->updater->getStrategy()->getPharUrl(), 'https://www.example.com');
     }
 
     public function testSetPharUrlThrowsExceptionOnInvalidUrl()
     {
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
-        $this->updater->setPharUrl('silly:///home/padraic');
+        $this->updater->getStrategy()->setPharUrl('silly:///home/padraic');
     }
 
     public function testSetVersionUrlWithUrl()
     {
-        $this->updater->setVersionUrl('http://www.example.com');
-        $this->assertEquals($this->updater->getVersionUrl(), 'http://www.example.com');
+        $this->updater->getStrategy()->setVersionUrl('http://www.example.com');
+        $this->assertEquals($this->updater->getStrategy()->getVersionUrl(), 'http://www.example.com');
 
-        $this->updater->setVersionUrl('https://www.example.com');
-        $this->assertEquals($this->updater->getVersionUrl(), 'https://www.example.com');
+        $this->updater->getStrategy()->setVersionUrl('https://www.example.com');
+        $this->assertEquals($this->updater->getStrategy()->getVersionUrl(), 'https://www.example.com');
     }
 
     public function testSetVersionUrlThrowsExceptionOnInvalidUrl()
     {
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
-        $this->updater->setVersionUrl('silly:///home/padraic');
+        $this->updater->getStrategy()->setVersionUrl('silly:///home/padraic');
     }
 
     public function testCanDetectNewRemoteVersionAndStoreVersions()
     {
-        $this->updater->setVersionUrl('file://' . $this->files . '/good.version');
+        $this->updater->getStrategy()->setVersionUrl('file://' . $this->files . '/good.version');
         $this->assertTrue($this->updater->hasUpdate());
         $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $this->updater->getOldVersion());
         $this->assertEquals('1af1b9c94dea1ff337587bfa9109f1dad1ec7b9b', $this->updater->getNewVersion());
@@ -112,7 +112,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
             'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
             'Version request returned empty response'
         );
-        $this->updater->setVersionUrl('file://' . $this->files . '/empty.version');
+        $this->updater->getStrategy()->setVersionUrl('file://' . $this->files . '/empty.version');
         $this->assertTrue($this->updater->hasUpdate());
     }
 
@@ -122,7 +122,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
             'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
             'Version request returned incorrectly formatted response'
         );
-        $this->updater->setVersionUrl('file://' . $this->files . '/bad.version');
+        $this->updater->getStrategy()->setVersionUrl('file://' . $this->files . '/bad.version');
         $this->assertTrue($this->updater->hasUpdate());
     }
 
@@ -135,8 +135,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
         $updater = new Updater($this->tmp . '/old.phar');
-        $updater->setPharUrl('file://' . $this->files . '/build/new.phar');
-        $updater->setVersionUrl('file://' . $this->files . '/build/new.version');
+        $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/new.phar');
+        $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/new.version');
         $this->assertTrue($updater->update());
         $this->assertEquals('new', $this->getPharOutput($this->tmp . '/old.phar'));
     }
@@ -152,8 +152,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         copy($this->files . '/build/badkey.phar.pubkey', $this->tmp . '/old.phar.pubkey');
 
         $updater = new Updater($this->tmp . '/old.phar');
-        $updater->setPharUrl('file://' . $this->files . '/build/new.phar');
-        $updater->setVersionUrl('file://' . $this->files . '/build/new.version');
+        $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/new.phar');
+        $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/new.version');
 
         $this->setExpectedException('UnexpectedValueException');
         $updater->update();
@@ -181,8 +181,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('UnexpectedValueException');
 
         $updater = new Updater($this->tmp . '/old.phar');
-        $updater->setPharUrl('file://' . $this->files . '/build/badsig.phar');
-        $updater->setVersionUrl('file://' . $this->files . '/build/badsig.version');
+        $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/badsig.phar');
+        $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/badsig.version');
         $updater->update();
     }
 
@@ -193,8 +193,8 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     {
         $this->createTestPharAndKey();
         $updater = new Updater($this->tmp . '/old.phar');
-        $updater->setPharUrl('file://' . $this->files . '/build/nosig.phar');
-        $updater->setVersionUrl('file://' . $this->files . '/build/nosig.version');
+        $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/nosig.phar');
+        $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/nosig.version');
 
         /** If newly download phar lacks an expected signature, an exception should be thrown */
         $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
