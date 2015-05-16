@@ -16,6 +16,8 @@ use Humbug\SelfUpdate\VersionParser;
 class VersionParserTest extends \PHPUnit_Framework_TestCase
 {
 
+    // Stable Versions
+
     public function testShouldSelectNothingFromUnstablesIfStableRequested()
     {
         $versions = ['1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
@@ -64,5 +66,43 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $versions = ['1.0.0', '1.0.0pl2', '1.0.0pl3', '1.0.0pl1'];
         $parser = new VersionParser($versions);
         $this->assertSame('1.0.0pl3', $parser->getMostRecentStable());
+    }
+
+    // Unstable
+    
+    public function testShouldSelectNothingFromUnstablesIfUnstableRequested()
+    {
+        $versions = ['1.0.0', '1.0.1', '1.1.0'];
+        $parser = new VersionParser($versions);
+        $this->assertSame(false, $parser->getMostRecentUnstable());
+    }
+
+    public function testShouldSelectMostRecentUnstableVersionFromStandardSelection()
+    {
+        $versions = ['1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
+        '1.0.0beta', '1.0.0rc', '1.0.0RC'];
+        $parser = new VersionParser($versions);
+        $this->assertSame('1.0.0rc', $parser->getMostRecentUnstable());
+    }
+
+    public function testShouldSelectMostRecentUnstableVersionFromMixedSelection()
+    {
+        $versions = ['1.0.0', '1.0.1', '1.1.0', '1.2.0a', '1.2.0b', '1.1.0rc'];
+        $parser = new VersionParser($versions);
+        $this->assertSame('1.2.0b', $parser->getMostRecentUnstable());
+    }
+
+    public function testShouldSelectMostRecentUnstableVersionFromPrefixedSelection()
+    {
+        $versions = ['v1.0.0b', 'v1.0.1', 'v1.1.0'];
+        $parser = new VersionParser($versions);
+        $this->assertSame('v1.0.0b', $parser->getMostRecentUnstable());
+    }
+
+    public function testShouldSelectMostRecentUnstableVersionFromPartlyPrefixedSelection()
+    {
+        $versions = ['v1.0.0b', 'v1.0.0a', '1.1.0a'];
+        $parser = new VersionParser($versions);
+        $this->assertSame('1.1.0a', $parser->getMostRecentUnstable());
     }
 }

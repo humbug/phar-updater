@@ -29,11 +29,31 @@ class VersionParser
         return $this->selectRecentStable();
     }
 
+    public function getMostRecentUnStable()
+    {
+        return $this->selectRecentUnstable();
+    }
+
     private function selectRecentStable()
     {
         $candidates = [];
         foreach ($this->versions as $version) {
             if (!$this->isStable($version)) {
+                continue;
+            }
+            $candidates[] = $version;
+        }
+        if (empty($candidates)) {
+            return false;
+        }
+        return $this->findMostRecent($candidates);
+    }
+
+    private function selectRecentUnstable()
+    {
+        $candidates = [];
+        foreach ($this->versions as $version) {
+            if ($this->isStable($version)) {
                 continue;
             }
             $candidates[] = $version;
