@@ -92,8 +92,6 @@ class ShaStrategy extends AbstractStrategy
         return sha1_file($updater->getLocalPharFile());
     }
 
-
-
     /**
      * Set URL to phar file
      *

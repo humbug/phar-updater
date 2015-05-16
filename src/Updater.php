@@ -18,6 +18,7 @@ use Humbug\SelfUpdate\Exception\FilesystemException;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\NoSignatureException;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
+use Humbug\SelfUpdate\Strategy\GithubStrategy;
 use Symfony\Component\Finder\Finder;
 
 class Updater
@@ -159,6 +160,7 @@ class Updater
     {
         switch ($strategy) {
             case self::STRATEGY_GITHUB:
+                $this->strategy = new GithubStrategy;
                 break;
 
             default:

@@ -83,7 +83,7 @@ class GithubStrategy extends AbstractStrategy
         $versionParser = new VersionParser($version);
         $this->remoteVersion = $versionParser->getMostRecentStable();
 
-        $this->remoteUrl = $this->getDownloadUrl($package)
+        $this->remoteUrl = $this->getDownloadUrl($package);
 
         return $this->remoteVersion;
     }
