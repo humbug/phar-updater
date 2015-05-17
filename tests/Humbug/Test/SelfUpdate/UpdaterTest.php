@@ -257,8 +257,15 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class FooStrategy implements StrategyInterface {
-    public function download(Updater $updater){}
-    public function getCurrentRemoteVersion(Updater $updater){}
-    public function getCurrentLocalVersion(Updater $updater){}
+class FooStrategy implements StrategyInterface
+{
+    public function download(Updater $updater)
+    {
+    }
+    public function getCurrentRemoteVersion(Updater $updater)
+    {
+    }
+    public function getCurrentLocalVersion(Updater $updater)
+    {
+    }
 }
