@@ -18,7 +18,7 @@ use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\JsonParsingException;
 
-class GithubStrategy extends AbstractStrategy
+class GithubStrategy implements StrategyInterface
 {
 
     const API_URL = 'https://packagist.org/packages/%s.json';
