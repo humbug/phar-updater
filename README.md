@@ -256,3 +256,24 @@ download a new phar along with the new key. While that sounds extreme, it's gene
 not a good idea to allow for arbitrary key changes that occur without user knowledge.
 The openssl signing has no mechanism such as a central authority or a browser's trusted
 certificate stash with which to automate such key changes in a safe manner.
+
+
+Github Releases
+---------------
+
+When tagging new versions on Github, these are created and hosted as `Github Releases`
+which allow you to attach a changelog and additional file downloads. Using this
+Github feature allows you to attach new phars to releases, associating them with
+a version string that is published on Packagist.
+
+Taking advantage of this architecture, the Github Strategy for updating phars can
+compare the existing local phar's version against remote release versions and
+update to the most recent stable (or unstable) version from Github.
+
+At present, it's assume that phar files all bear the same name across releases,
+i.e. just a plain name like `myapp.phar` without versioning information in the
+file name. You can also upload your phar's public key in the same way. Using
+the established convention of being the phar name with `.pubkey` appended, e.g.
+`myapp.phar` would be matched with `myapp.phar.pubkey`.
+
+You can read more about Github releases [here](https://help.github.com/articles/creating-releases/).
