@@ -277,3 +277,9 @@ the established convention of being the phar name with `.pubkey` appended, e.g.
 `myapp.phar` would be matched with `myapp.phar.pubkey`.
 
 You can read more about Github releases [here](https://help.github.com/articles/creating-releases/).
+
+While you can draft a release, Github releases are created automatically whenever
+you create a new git tag. If you use git tagging, you can go to the matching
+release on Github, click the `Edit` button and attach files. It's recommended to
+do this as soon as possible after tagging to limit the window whereby a new
+release exists without an updated phar attached.
