@@ -64,6 +64,15 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testSetPackageName()
+    {
+        $this->updater->getStrategy()->setPackageName('foo/bar');
+        $this->assertEquals(
+            'foo/bar',
+            $this->updater->getStrategy()->getPackageName()
+        );
+    }
+
     /**
      * Helpers
      */

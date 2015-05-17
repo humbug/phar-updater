@@ -130,6 +130,7 @@ use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
 $updater->setStrategy(Updater::STRATEGY_GITHUB);
+$updater->getStrategy()->setPackageName('myvendor/myapp');
 $updater->getStrategy()->setPharName('myapp.phar');
 $updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
 try {
@@ -139,6 +140,9 @@ try {
     exit('Well, something happened! Either an oopsie or something involving hackers.');
 }
 ```
+
+Package name refers to the name used by Packagist, and phar name is the phar's
+file name assumed to be constant across versions.
 
 It's left to the implementation to supply the current release version associated
 with the local phar. This needs to be stored within the phar and should match

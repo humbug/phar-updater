@@ -44,6 +44,11 @@ class GithubStrategy implements StrategyInterface
     private $pharName;
 
     /**
+     * @var string
+     */
+    private $packageName;
+
+    /**
      * Download the remote Phar file.
      *
      * @param Updated $updater
@@ -74,7 +79,7 @@ class GithubStrategy implements StrategyInterface
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $packageUrl = sprintf(self::API_URL, $updater->getPackageName());
+        $packageUrl = $this->getApiUrl();
         $package = json_decode(humbug_get_contents($packageUrl), true);
         restore_error_handler();
 
@@ -116,6 +121,26 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
+     * Set Package name
+     *
+     * @param string $name
+     */
+    public function setPackageName($name)
+    {
+        $this->packageName = $name;
+    }
+
+    /**
+     * Get Package name
+     *
+     * @return string
+     */
+    public function getPackageName()
+    {
+        return $this->packageName;
+    }
+
+    /**
      * Set phar file's name
      *
      * @param string $name
@@ -133,6 +158,11 @@ class GithubStrategy implements StrategyInterface
     public function getPharName()
     {
         return $this->pharName;
+    }
+
+    protected function getApiUrl()
+    {
+        return sprintf(self::API_URL, $updater->getPackageName());
     }
 
     protected function getDownloadUrl(array $package)
