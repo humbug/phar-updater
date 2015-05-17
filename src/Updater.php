@@ -17,6 +17,7 @@ use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\FilesystemException;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\NoSignatureException;
+use Humbug\SelfUpdate\Strategy\StrategyInterface;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
 use Symfony\Component\Finder\Finder;
@@ -29,7 +30,7 @@ class Updater
     const STRATEGY_GITHUB = 'github';
 
     /**
-     * @var Humbug\SelfUpdate\Strategy\AbstractStrategy
+     * @var StrategyInterface
      */
     protected $strategy;
 
@@ -167,6 +168,11 @@ class Updater
                 $this->strategy = new ShaStrategy;
                 break;
         }
+    }
+
+    public function setStrategyObject(StrategyInterface $strategy)
+    {
+        $this->strategy = $strategy;
     }
 
     public function getStrategy()

@@ -12,6 +12,7 @@
 namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\Strategy\StrategyInterface;
 
 class UpdaterTest extends \PHPUnit_Framework_TestCase
 {
@@ -220,6 +221,16 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Custom Strategies
+     */
+
+    public function testCanSetCustomStrategyObjects()
+    {
+        $this->updater->setStrategyObject(new FooStrategy);
+        $this->assertTrue($this->updater->getStrategy() instanceof FooStrategy);
+    }
+
+    /**
      * Helpers
      */
 
@@ -244,4 +255,10 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
             $this->tmp.'/old.phar.pubkey'
         );
     }
+}
+
+class FooStrategy implements StrategyInterface {
+    public function download(Updater $updater){}
+    public function getCurrentRemoteVersion(Updater $updater){}
+    public function getCurrentLocalVersion(Updater $updater){}
 }
