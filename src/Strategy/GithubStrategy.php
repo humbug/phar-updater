@@ -16,6 +16,7 @@ use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\VersionParser;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
+use Humbug\SelfUpdate\Exception\JsonParsingException;
 
 class GithubStrategy extends AbstractStrategy
 {
@@ -77,7 +78,12 @@ class GithubStrategy extends AbstractStrategy
         $package = json_decode(humbug_get_contents($packageUrl), true);
         restore_error_handler();
 
-        // check json errors
+        if (null === $package || json_last_error() !== JSON_ERROR_NONE) {
+            throw new JsonConfigException(
+                'Error parsing configuration file JSON'
+                . (function_exists('json_last_error_msg') ? ': ' . json_last_error_msg() : '')
+            );
+        }
 
         $versions = array_keys($package['package']['versions']);
         $versionParser = new VersionParser($version);
