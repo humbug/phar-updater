@@ -80,7 +80,7 @@ class GithubStrategy extends AbstractStrategy
 
         if (null === $package || json_last_error() !== JSON_ERROR_NONE) {
             throw new JsonConfigException(
-                'Error parsing configuration file JSON'
+                'Error parsing JSON package data'
                 . (function_exists('json_last_error_msg') ? ': ' . json_last_error_msg() : '')
             );
         }
