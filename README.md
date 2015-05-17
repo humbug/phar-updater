@@ -208,7 +208,7 @@ $updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
 $updater = new Updater('/path/to/impersonatephil.phar', false);
 ```
 
-### Symfony Console Events (Avoid Post Update File Includes)
+### Avoid Post Update File Includes
 
 Updating a currently running phar is made trickier since, once replaced, attempts
 to load files from it within a process originating from an older phar is likely
@@ -220,6 +220,21 @@ The solution is to disable or remove the dispatcher for your self-update command
 
 In general, when writing your self-update CLI commands, either pre-load any classes
 likely needed prior to updating, or disable their loading if not essential.
+
+### Custom Update Strategies
+
+All update strategies revolve around checking for updates, and downloading updates.
+The actual work behind replacing local files and backups is handled separate.
+To create a custom strategy, you can implement `Humbug\SelfUpdate\Strategy\StrategyInterface`
+and pass a new instance of your implementation post-construction.
+
+```php
+$updater = new Updater(null, false);
+$updater->setStrategyObject(new MyStrategy);
+```
+
+The similar `setStrategy()` method is solely used to pass flags matching internal
+strategies.
 
 Update Strategies
 =================
