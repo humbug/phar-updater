@@ -348,14 +348,16 @@ class Updater
             );
         }
 
-        $tmpVersion = sha1_file($this->getTempPharFile());
-        if ($tmpVersion !== $this->getNewVersion()) {
-            $this->cleanupAfterError();
-            throw new HttpRequestException(sprintf(
-                'Download file appears to be corrupted or outdated. The file '
-                    . 'received does not have the expected SHA-1 hash: %s.',
-                $this->getNewVersion()
-            ));
+        if ($this->getStrategy() instanceof ShaStrategy) {
+            $tmpVersion = sha1_file($this->getTempPharFile());
+            if ($tmpVersion !== $this->getNewVersion()) {
+                $this->cleanupAfterError();
+                throw new HttpRequestException(sprintf(
+                    'Download file appears to be corrupted or outdated. The file '
+                        . 'received does not have the expected SHA-1 hash: %s.',
+                    $this->getNewVersion()
+                ));
+            }
         }
 
         try {

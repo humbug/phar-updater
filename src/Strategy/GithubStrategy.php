@@ -58,11 +58,11 @@ class GithubStrategy implements StrategyInterface
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $result = humbug_get_contents($this->getDownloadUrl());
+        $result = humbug_get_contents($this->remoteUrl);
         restore_error_handler();
         if (false === $result) {
             throw new HttpRequestException(sprintf(
-                'Request to URL failed: %s', $this->getDownloadUrl()
+                'Request to URL failed: %s', $this->remoteUrl
             ));
         }
 
@@ -84,14 +84,14 @@ class GithubStrategy implements StrategyInterface
         restore_error_handler();
 
         if (null === $package || json_last_error() !== JSON_ERROR_NONE) {
-            throw new JsonConfigException(
+            throw new JsonParsingException(
                 'Error parsing JSON package data'
                 . (function_exists('json_last_error_msg') ? ': ' . json_last_error_msg() : '')
             );
         }
 
         $versions = array_keys($package['package']['versions']);
-        $versionParser = new VersionParser($version);
+        $versionParser = new VersionParser($versions);
         $this->remoteVersion = $versionParser->getMostRecentStable();
 
         $this->remoteUrl = $this->getDownloadUrl($package);
@@ -162,7 +162,7 @@ class GithubStrategy implements StrategyInterface
 
     protected function getApiUrl()
     {
-        return sprintf(self::API_URL, $updater->getPackageName());
+        return sprintf(self::API_URL, $this->getPackageName());
     }
 
     protected function getDownloadUrl(array $package)
@@ -178,5 +178,6 @@ class GithubStrategy implements StrategyInterface
             $this->remoteVersion,
             $this->getPharName()
         );
+        return $downloadUrl;
     }
 }
