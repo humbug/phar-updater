@@ -73,6 +73,27 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testSetStability()
+    {
+        $this->assertEquals(
+            'stable',
+            $this->updater->getStrategy()->getStability()
+        );
+        $this->updater->getStrategy()->setStability('unstable');
+        $this->assertEquals(
+            'unstable',
+            $this->updater->getStrategy()->getStability()
+        );
+    }
+
+    public function testSetStabilityThrowsExceptionOnInvalidStabilityValue()
+    {
+        $this->setExpectedException(
+            'Humbug\\SelfUpdate\\Exception\\InvalidArgumentException'
+        );
+        $this->updater->getStrategy()->setStability('foo');
+    }
+
     /**
      * @runInSeparateProcess
      */

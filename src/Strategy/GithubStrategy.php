@@ -23,6 +23,10 @@ class GithubStrategy implements StrategyInterface
 
     const API_URL = 'https://packagist.org/packages/%s.json';
 
+    const STABLE = 'stable';
+
+    const UNSTABLE = 'unstable';
+
     /**
      * @var string
      */
@@ -47,6 +51,11 @@ class GithubStrategy implements StrategyInterface
      * @var string
      */
     private $packageName;
+
+    /**
+     * @var string
+     */
+    private $stability = self::STABLE;
 
     /**
      * Download the remote Phar file.
@@ -92,7 +101,11 @@ class GithubStrategy implements StrategyInterface
 
         $versions = array_keys($package['package']['versions']);
         $versionParser = new VersionParser($versions);
-        $this->remoteVersion = $versionParser->getMostRecentStable();
+        if ($this->getStability() === self::STABLE) {
+            $this->remoteVersion = $versionParser->getMostRecentStable();
+        } else {
+            $this->remoteVersion = $versionParser->getMostRecentUnstable();
+        }
 
         $this->remoteUrl = $this->getDownloadUrl($package);
 
@@ -158,6 +171,31 @@ class GithubStrategy implements StrategyInterface
     public function getPharName()
     {
         return $this->pharName;
+    }
+
+    /**
+     * Set target stability
+     *
+     * @param string $name
+     */
+    public function setStability($stability)
+    {
+        if ($stability !== self::STABLE && $stability !== self::UNSTABLE) {
+            throw new InvalidArgumentException(
+                'Invalid stability value. Must be one of "stable" or "unstable".'
+            );
+        }
+        $this->stability = $stability;
+    }
+
+    /**
+     * Get target stability
+     *
+     * @return string
+     */
+    public function getStability()
+    {
+        return $this->stability;
     }
 
     protected function getApiUrl()

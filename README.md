@@ -150,6 +150,15 @@ the version string used by Github. This can follow any standard practice with
 recognisable pre- and postfixes, e.g.
 `v1.0.3`, `1.0.3`, `1.1`, `1.3rc`, `1.3.2pl2`.
 
+If you wish to update to a non-stable version, for example where users want to
+update according to a development track, you can set the stability flag for the
+Github strategy. By default this is set to `stable` or, in constant form,
+`\Humbug\SelfUpdate\Strategy\GithubStrategy::STABLE`:
+
+```php
+$updater->getStrategy()->setStability('unstable');
+```
+
 ### Rollback Support
 
 The Updater automatically copies a backup of the original phar to myname-old.phar.
