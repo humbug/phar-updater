@@ -12,7 +12,7 @@ minions (all ten of them) have written one for you.
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
-    - [Basic SHA-1 Strategy](#basic-sha-1-strategy)G
+    - [Basic SHA-1 Strategy](#basic-sha-1-strategy)
     - [Github Release Strategy](#github-release-strategy)
     - [Rollback Support](#rollback-support)
     - [Constructor Parameters](#constructor-parameters)
