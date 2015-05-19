@@ -27,6 +27,8 @@ class GithubStrategy implements StrategyInterface
 
     const UNSTABLE = 'unstable';
 
+    const ANY = 'any';
+
     /**
      * @var string
      */
@@ -103,8 +105,10 @@ class GithubStrategy implements StrategyInterface
         $versionParser = new VersionParser($versions);
         if ($this->getStability() === self::STABLE) {
             $this->remoteVersion = $versionParser->getMostRecentStable();
-        } else {
+        } elseif ($this->getStability() === self::UNSTABLE) {
             $this->remoteVersion = $versionParser->getMostRecentUnstable();
+        } else {
+            $this->remoteVersion = $versionParser->getMostRecentAny();
         }
 
         $this->remoteUrl = $this->getDownloadUrl($package);
@@ -180,9 +184,9 @@ class GithubStrategy implements StrategyInterface
      */
     public function setStability($stability)
     {
-        if ($stability !== self::STABLE && $stability !== self::UNSTABLE) {
+        if ($stability !== self::STABLE && $stability !== self::UNSTABLE && $stability !== self::ANY) {
             throw new InvalidArgumentException(
-                'Invalid stability value. Must be one of "stable" or "unstable".'
+                'Invalid stability value. Must be one of "stable", "unstable" or "any".'
             );
         }
         $this->stability = $stability;

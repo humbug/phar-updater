@@ -177,6 +177,12 @@ Github strategy. By default this is set to `stable` or, in constant form,
 $updater->getStrategy()->setStability('unstable');
 ```
 
+If you want to ignore stability and just update to the most recent version regardless:
+
+```php
+$updater->getStrategy()->setStability('any');
+```
+
 ### Rollback Support
 
 The Updater automatically copies a backup of the original phar to myname-old.phar.
