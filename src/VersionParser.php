@@ -34,6 +34,11 @@ class VersionParser
         return $this->selectRecentUnstable();
     }
 
+    public function getMostRecentAll()
+    {
+        return $this->selectRecentAll();
+    }
+
     private function selectRecentStable()
     {
         $candidates = [];
@@ -62,6 +67,11 @@ class VersionParser
             return false;
         }
         return $this->findMostRecent($candidates);
+    }
+
+    private function selectRecentAll()
+    {
+        return $this->findMostRecent($this->versions);
     }
 
     private function findMostRecent(array $candidates)
