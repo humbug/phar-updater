@@ -19,7 +19,7 @@ class VersionParser
 
     private $modifier = '[._-]?(?:(stable|beta|b|RC|alpha|a|patch|pl|p)(?:[.-]?(\d+))?)?([.-]?dev)?';
 
-    public function __construct(array $versions)
+    public function __construct(array $versions = array())
     {
         $this->versions = $versions;
     }
@@ -39,11 +39,26 @@ class VersionParser
         return $this->selectRecentAll();
     }
 
+    public function isStable($version)
+    {
+        return $this->stable($version);
+    }
+
+    public function isPreRelease($version)
+    {
+        return !$this->stable($version) && !$this->development($version);
+    }
+
+    public function isDevelopment($version)
+    {
+        return $this->development($version);
+    }
+
     private function selectRecentStable()
     {
         $candidates = [];
         foreach ($this->versions as $version) {
-            if (!$this->isStable($version)) {
+            if (!$this->stable($version)) {
                 continue;
             }
             $candidates[] = $version;
@@ -58,7 +73,7 @@ class VersionParser
     {
         $candidates = [];
         foreach ($this->versions as $version) {
-            if ($this->isStable($version)) {
+            if ($this->stable($version)) {
                 continue;
             }
             $candidates[] = $version;
@@ -86,10 +101,10 @@ class VersionParser
         return $candidate;
     }
 
-    private function isStable($version)
+    private function stable($version)
     {
         $version = preg_replace('{#.+$}i', '', $version);
-        if ('dev-' === substr($version, 0, 4) || '-dev' === substr($version, -4)) {
+        if ($this->development($version)) {
             return false;
         }
         preg_match('{'.$this->modifier.'$}i', strtolower($version), $match);
@@ -104,5 +119,13 @@ class VersionParser
             }
         }
         return true;
+    }
+
+    private function development($version)
+    {
+        if ('dev-' === substr($version, 0, 4) || '-dev' === substr($version, -4)) {
+            return true;
+        }
+        return false;
     }
 }

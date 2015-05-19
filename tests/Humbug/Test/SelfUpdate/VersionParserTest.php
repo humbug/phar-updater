@@ -115,4 +115,29 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('v1.1.0a', $parser->getMostRecentAll());
     }
 
+    // Basic Version Category Checks
+
+    public function testIsStable()
+    {
+        $parser = new VersionParser;
+        $this->assertTrue($parser->isStable('1.0.0'));
+        $this->assertFalse($parser->isStable('1.0.0b'));
+        $this->assertFalse($parser->isStable('1.0.0-dev'));
+    }
+
+    public function testIsPreRelease()
+    {
+        $parser = new VersionParser;
+        $this->assertFalse($parser->isPreRelease('1.0.0'));
+        $this->assertTrue($parser->isPreRelease('1.0.0b'));
+        $this->assertFalse($parser->isPreRelease('1.0.0-dev'));
+    }
+
+    public function testIsDevelopment()
+    {
+        $parser = new VersionParser;
+        $this->assertFalse($parser->isDevelopment('1.0.0'));
+        $this->assertFalse($parser->isDevelopment('1.0.0b'));
+        $this->assertTrue($parser->isDevelopment('1.0.0-dev'));
+    }
 }
