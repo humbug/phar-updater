@@ -133,6 +133,14 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($parser->isPreRelease('1.0.0-dev'));
     }
 
+    public function testIsUnstable()
+    {
+        $parser = new VersionParser;
+        $this->assertFalse($parser->isUnstable('1.0.0'));
+        $this->assertTrue($parser->isUnstable('1.0.0b'));
+        $this->assertTrue($parser->isUnstable('1.0.0-dev'));
+    }
+
     public function testIsDevelopment()
     {
         $parser = new VersionParser;
