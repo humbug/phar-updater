@@ -319,7 +319,7 @@ class Updater
         $this->newVersion = $this->strategy->getCurrentRemoteVersion($this);
         $this->oldVersion = $this->strategy->getCurrentLocalVersion($this);
 
-        if ($this->newVersion !== $this->oldVersion) {
+        if (!empty($this->newVersion) && ($this->newVersion !== $this->oldVersion)) {
             return true;
         }
         return false;

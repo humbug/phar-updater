@@ -29,7 +29,7 @@ interface StrategyInterface
      * Retrieve the current version available remotely.
      *
      * @param Updated $updater
-     * @return void
+     * @return string|bool
      */
     public function getCurrentRemoteVersion(Updater $updater);
 
