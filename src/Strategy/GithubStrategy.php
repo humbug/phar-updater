@@ -111,7 +111,12 @@ class GithubStrategy implements StrategyInterface
             $this->remoteVersion = $versionParser->getMostRecentAny();
         }
 
-        $this->remoteUrl = $this->getDownloadUrl($package);
+        /**
+         * Setup remote URL if there's an actual version to download
+         */
+        if (!empty($this->remoteVersion)) {
+            $this->remoteUrl = $this->getDownloadUrl($package);
+        }
 
         return $this->remoteVersion;
     }
