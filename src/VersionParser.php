@@ -131,7 +131,7 @@ class VersionParser
     {
         $candidates = [];
         foreach ($this->versions as $version) {
-            if ($this->stable($version)) {
+            if ($this->stable($version) || $this->development($version)) {
                 continue;
             }
             $candidates[] = $version;
@@ -144,7 +144,17 @@ class VersionParser
 
     private function selectRecentAll()
     {
-        return $this->findMostRecent($this->versions);
+        $candidates = [];
+        foreach ($this->versions as $version) {
+            if ($this->development($version)) {
+                continue;
+            }
+            $candidates[] = $version;
+        }
+        if (empty($candidates)) {
+            return false;
+        }
+        return $this->findMostRecent($candidates);
     }
 
     private function findMostRecent(array $candidates)

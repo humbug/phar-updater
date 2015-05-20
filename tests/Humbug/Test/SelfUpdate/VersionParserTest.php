@@ -77,6 +77,13 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(false, $parser->getMostRecentUnstable());
     }
 
+    public function testShouldSelectNothingFromStablesOrDevsIfUnstableRequested()
+    {
+        $versions = ['1.0.0', '1.0.1', '1.1.0-dev', 'dev-1.1.1'];
+        $parser = new VersionParser($versions);
+        $this->assertSame(false, $parser->getMostRecentUnstable());
+    }
+
     public function testShouldSelectMostRecentUnstableVersionFromStandardSelection()
     {
         $versions = ['1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
@@ -108,9 +115,9 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
 
     // All versions (ignoring stability)
 
-    public function testShouldSelectMostRecentIgnoringStabilityFromPrefixedSelection()
+    public function testShouldSelectMostRecentIgnoringStabilityExceptDevFromPrefixedSelection()
     {
-        $versions = ['v1.0.0b', 'v1.0.1', 'v1.1.0a'];
+        $versions = ['v1.0.0b', 'v1.0.1', 'v1.1.0a', 'v1.2.0-dev'];
         $parser = new VersionParser($versions);
         $this->assertSame('v1.1.0a', $parser->getMostRecentAll());
     }
