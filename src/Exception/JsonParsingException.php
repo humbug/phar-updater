@@ -8,7 +8,7 @@
  * @license    https://github.com/padraic/humbug/blob/master/LICENSE New BSD License
  */
 
-namespace Humbug\Exception;
+namespace Humbug\SelfUpdate\Exception;
 
 class JsonParsingException extends RuntimeException
 {
