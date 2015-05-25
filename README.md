@@ -73,8 +73,8 @@ other than the current one, and include this.
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
-$updater->getStrategy()->setPharUrl('http://example.com/current.phar');
-$updater->getStrategy()->setVersionUrl('http://example.com/current.version');
+$updater->getStrategy()->setPharUrl('https://example.com/current.phar');
+$updater->getStrategy()->setVersionUrl('https://example.com/current.version');
 try {
     $result = $updater->update();
     $result ? exit('Updated!') : exit('No update needed!');
@@ -94,8 +94,8 @@ If you are not signing the phar using OpenSSL:
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater(null, false);
-$updater->getStrategy()->setPharUrl('http://example.com/current.phar');
-$updater->getStrategy()->setVersionUrl('http://example.com/current.version');
+$updater->getStrategy()->setPharUrl('https://example.com/current.phar');
+$updater->getStrategy()->setVersionUrl('https://example.com/current.version');
 try {
     $result = $updater->update();
     $result ? exit('Updated!') : exit('No update needed!');
@@ -110,8 +110,8 @@ If you need version information:
 use Humbug\SelfUpdate\Updater;
 
 $updater = new Updater();
-$updater->getStrategy()->setPharUrl('http://example.com/current.phar');
-$updater->getStrategy()->setVersionUrl('http://example.com/current.version');
+$updater->getStrategy()->setPharUrl('https://example.com/current.phar');
+$updater->getStrategy()->setVersionUrl('https://example.com/current.version');
 try {
     $result = $updater->update();
     if ($result) {
