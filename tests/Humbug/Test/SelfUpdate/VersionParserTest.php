@@ -113,6 +113,13 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('1.1.0a', $parser->getMostRecentUnstable());
     }
 
+    public function testShouldSelectMostRecentUnstableFromVaryingNumeralCounts()
+    {
+        $versions = ['1.0-dev', '1.0.0-alpha1'];
+        $parser = new VersionParser($versions);
+        $this->assertSame('1.0.0-alpha1', $parser->getMostRecentUnstable());
+    }
+
     // All versions (ignoring stability)
 
     public function testShouldSelectMostRecentIgnoringStabilityExceptDevFromPrefixedSelection()
