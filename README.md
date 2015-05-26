@@ -134,7 +134,7 @@ phars which are released to a specific numbered version.
 
 ### Github Release Strategy
 
-Beyond devleopment or nightly phars, if you are released numbered versions on
+Beyond development or nightly phars, if you are released numbered versions on
 Github (i.e. tags), you can upload additional files (such as phars) to include in
 the Github Release.
 
