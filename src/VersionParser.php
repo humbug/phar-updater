@@ -28,7 +28,7 @@ class VersionParser
     /**
      * @param array $versions
      */
-    public function __construct(array $versions = [])
+    public function __construct(array $versions = array())
     {
         $this->versions = $versions;
     }
@@ -114,7 +114,7 @@ class VersionParser
 
     private function selectRecentStable()
     {
-        $candidates = [];
+        $candidates = array();
         foreach ($this->versions as $version) {
             if (!$this->stable($version)) {
                 continue;
@@ -129,7 +129,7 @@ class VersionParser
 
     private function selectRecentUnstable()
     {
-        $candidates = [];
+        $candidates = array();
         foreach ($this->versions as $version) {
             if ($this->stable($version) || $this->development($version)) {
                 continue;
@@ -144,7 +144,7 @@ class VersionParser
 
     private function selectRecentAll()
     {
-        $candidates = [];
+        $candidates = array();
         foreach ($this->versions as $version) {
             if ($this->development($version)) {
                 continue;

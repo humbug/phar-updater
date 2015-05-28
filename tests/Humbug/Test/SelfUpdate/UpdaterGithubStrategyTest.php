@@ -141,19 +141,19 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         );
         @mkdir($this->tmp.'/releases/download/1.0.1', 0755, true);
         copy($this->files.'/build/new.phar', $this->tmp.'/releases/download/1.0.1/new.phar');
-        file_put_contents($this->tmp . '/package.json', json_encode([
-            'package' => [
-                'versions' => [
-                    '1.0.1' => [
-                        'source' => [
+        file_put_contents($this->tmp . '/package.json', json_encode(array(
+            'package' => array(
+                'versions' => array(
+                    '1.0.1' => array(
+                        'source' => array(
                             'url' => 'file://' . $this->tmp . '.git'
-                        ]
-                    ],
-                    '1.0.0' => [
-                    ]
-                ]
-            ]
-        ]));
+                        )
+                    ),
+                    '1.0.0' => array(
+                    )
+                )
+            )
+        )));
     }
 }
 

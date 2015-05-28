@@ -20,102 +20,102 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
 
     public function testShouldSelectNothingFromUnstablesIfStableRequested()
     {
-        $versions = ['1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
-        '1.0.0beta', '1.0.0rc', '1.0.0RC'];
+        $versions = array('1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
+        '1.0.0beta', '1.0.0rc', '1.0.0RC');
         $parser = new VersionParser($versions);
         $this->assertSame(false, $parser->getMostRecentStable());
     }
-    
+
     public function testShouldSelectMostRecentVersionFromStandardSelection()
     {
-        $versions = ['1.0.0', '1.0.1', '1.1.0'];
+        $versions = array('1.0.0', '1.0.1', '1.1.0');
         $parser = new VersionParser($versions);
         $this->assertSame('1.1.0', $parser->getMostRecentStable());
     }
 
     public function testShouldSelectMostRecentVersionFromMixedSelection()
     {
-        $versions = ['1.0.0', '1.0.1', '1.1.0', '1.2.0a', '1.2.0b', '1.1.0rc'];
+        $versions = array('1.0.0', '1.0.1', '1.1.0', '1.2.0a', '1.2.0b', '1.1.0rc');
         $parser = new VersionParser($versions);
         $this->assertSame('1.1.0', $parser->getMostRecentStable());
     }
 
     public function testShouldSelectMostRecentVersionFromPrefixedSelection()
     {
-        $versions = ['v1.0.0', 'v1.0.1', 'v1.1.0'];
+        $versions = array('v1.0.0', 'v1.0.1', 'v1.1.0');
         $parser = new VersionParser($versions);
         $this->assertSame('v1.1.0', $parser->getMostRecentStable());
     }
 
     public function testShouldSelectMostRecentVersionFromPartlyPrefixedSelection()
     {
-        $versions = ['v1.0.0', 'v1.0.1', '1.1.0'];
+        $versions = array('v1.0.0', 'v1.0.1', '1.1.0');
         $parser = new VersionParser($versions);
         $this->assertSame('1.1.0', $parser->getMostRecentStable());
     }
 
     public function testShouldSelectMostRecentVersionFromPatchLevels()
     {
-        $versions = ['1.0.0', '1.0.0-pl2', '1.0.0-pl3', '1.0.0-pl1'];
+        $versions = array('1.0.0', '1.0.0-pl2', '1.0.0-pl3', '1.0.0-pl1');
         $parser = new VersionParser($versions);
         $this->assertSame('1.0.0-pl3', $parser->getMostRecentStable());
     }
 
     public function testShouldSelectMostRecentVersionFromPatchLevels2()
     {
-        $versions = ['1.0.0', '1.0.0pl2', '1.0.0pl3', '1.0.0pl1'];
+        $versions = array('1.0.0', '1.0.0pl2', '1.0.0pl3', '1.0.0pl1');
         $parser = new VersionParser($versions);
         $this->assertSame('1.0.0pl3', $parser->getMostRecentStable());
     }
 
     // Unstable
-    
+
     public function testShouldSelectNothingFromUnstablesIfUnstableRequested()
     {
-        $versions = ['1.0.0', '1.0.1', '1.1.0'];
+        $versions = array('1.0.0', '1.0.1', '1.1.0');
         $parser = new VersionParser($versions);
         $this->assertSame(false, $parser->getMostRecentUnstable());
     }
 
     public function testShouldSelectNothingFromStablesOrDevsIfUnstableRequested()
     {
-        $versions = ['1.0.0', '1.0.1', '1.1.0-dev', 'dev-1.1.1'];
+        $versions = array('1.0.0', '1.0.1', '1.1.0-dev', 'dev-1.1.1');
         $parser = new VersionParser($versions);
         $this->assertSame(false, $parser->getMostRecentUnstable());
     }
 
     public function testShouldSelectMostRecentUnstableVersionFromStandardSelection()
     {
-        $versions = ['1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
-        '1.0.0beta', '1.0.0rc', '1.0.0RC'];
+        $versions = array('1.0.0a', '1.0.0alpha', '1.0.0-dev', 'dev-1.0.0', '1.0.0b',
+        '1.0.0beta', '1.0.0rc', '1.0.0RC');
         $parser = new VersionParser($versions);
         $this->assertSame('1.0.0rc', $parser->getMostRecentUnstable());
     }
 
     public function testShouldSelectMostRecentUnstableVersionFromMixedSelection()
     {
-        $versions = ['1.0.0', '1.0.1', '1.1.0', '1.2.0a', '1.2.0b', '1.1.0rc'];
+        $versions = array('1.0.0', '1.0.1', '1.1.0', '1.2.0a', '1.2.0b', '1.1.0rc');
         $parser = new VersionParser($versions);
         $this->assertSame('1.2.0b', $parser->getMostRecentUnstable());
     }
 
     public function testShouldSelectMostRecentUnstableVersionFromPrefixedSelection()
     {
-        $versions = ['v1.0.0b', 'v1.0.1', 'v1.1.0'];
+        $versions = array('v1.0.0b', 'v1.0.1', 'v1.1.0');
         $parser = new VersionParser($versions);
         $this->assertSame('v1.0.0b', $parser->getMostRecentUnstable());
     }
 
     public function testShouldSelectMostRecentUnstableVersionFromPartlyPrefixedSelection()
     {
-        $versions = ['v1.0.0b', 'v1.0.0a', '1.1.0a'];
+        $versions = array('v1.0.0b', 'v1.0.0a', '1.1.0a');
         $parser = new VersionParser($versions);
         $this->assertSame('1.1.0a', $parser->getMostRecentUnstable());
     }
 
     public function testShouldSelectMostRecentUnstableFromVaryingNumeralCounts()
     {
-        $versions = ['1.0-dev', '1.0.0-alpha1'];
+        $versions = array('1.0-dev', '1.0.0-alpha1');
         $parser = new VersionParser($versions);
         $this->assertSame('1.0.0-alpha1', $parser->getMostRecentUnstable());
     }
@@ -124,7 +124,7 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
 
     public function testShouldSelectMostRecentIgnoringStabilityExceptDevFromPrefixedSelection()
     {
-        $versions = ['v1.0.0b', 'v1.0.1', 'v1.1.0a', 'v1.2.0-dev'];
+        $versions = array('v1.0.0b', 'v1.0.1', 'v1.1.0a', 'v1.2.0-dev');
         $parser = new VersionParser($versions);
         $this->assertSame('v1.1.0a', $parser->getMostRecentAll());
     }
