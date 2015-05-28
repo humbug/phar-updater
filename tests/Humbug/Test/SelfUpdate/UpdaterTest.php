@@ -132,6 +132,10 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdatePhar()
     {
+        if (!extension_loaded('openssl')) {
+            $this->markTestSkipped('This test requires the openssl extension to run.');
+        }
+
         $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
@@ -175,6 +179,10 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdatePharFailsOnExpectedSignatureMismatch()
     {
+        if (!extension_loaded('openssl')) {
+            $this->markTestSkipped('This test requires the openssl extension to run.');
+        }
+
         $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
