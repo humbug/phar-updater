@@ -108,7 +108,7 @@ class GithubStrategy implements StrategyInterface
         } elseif ($this->getStability() === self::UNSTABLE) {
             $this->remoteVersion = $versionParser->getMostRecentUnstable();
         } else {
-            $this->remoteVersion = $versionParser->getMostRecentAny();
+            $this->remoteVersion = $versionParser->getMostRecentAll();
         }
 
         /**
