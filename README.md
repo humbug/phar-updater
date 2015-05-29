@@ -34,7 +34,8 @@ The `humbug\phar-updater` package has the following features:
 * Support for SHA-1 version synchronisation and Github Releases as update strategies.
 
 Apart from the detailed documentation below, you can find the package being used
-in almost every possible way within [Humbug's self-update command](https://github.com/padraic/humbug/blob/master/src/Command/SelfUpdate.php).
+in almost every possible way within [Humbug's self-update command](https://github.com/padraic/humbug/blob/master/src/Command/SelfUpdate.php) as part of a `Symfony Console`
+based PHAR which you may freely reuse.
 
 Installation
 ============
