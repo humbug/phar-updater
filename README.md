@@ -16,6 +16,7 @@ minions (all ten of them) have written one for you.
     - [Github Release Strategy](#github-release-strategy)
     - [Rollback Support](#rollback-support)
     - [Constructor Parameters](#constructor-parameters)
+    - [Check For Updates](#check-for-updates)
     - [Avoid Post Update File Includes](#avoid-post-update-file-includes)
     - [Custom Update Strategies](#custom-update-strategies)
 - [Update Strategies](#update-strategies)
@@ -32,8 +33,8 @@ The `humbug\phar-updater` package has the following features:
 * Simple API where it either updates or Exceptions will go wild.
 * Support for SHA-1 version synchronisation and Github Releases as update strategies.
 
-Development continues so...give it a whirl and complain loudly in the issues
-section if needed.
+Apart from the detailed documentation below, you can find the package being used
+in almost every possible way within [Humbug's self-update command](https://github.com/padraic/humbug/blob/master/src/Command/SelfUpdate.php).
 
 Installation
 ============
@@ -239,6 +240,47 @@ $updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
  * Update a different phar which has NOT been signed.
  */
 $updater = new Updater('/path/to/impersonatephil.phar', false);
+```
+
+### Check For Updates
+
+You can tell users what updates are available, across any stability track, by making
+use of the `hasUpdate` method. This gets the most recent remote version for a
+stability level, compares it to the current version, and returns a simple true/false
+result, i.e. it will only be false where the local version is identical or where
+there was no remote version for that stability level at all. You can easily
+differentiate between the two false states as the new version will be a string
+where a version did exist, but `false` if not.
+
+```php
+use Humbug\SelfUpdate\Updater;
+
+/**
+ * Configuration is identical in every way for actual updates. You can run this
+ * across multiple configuration variants to get recent stable, unstable, and dev
+ * versions available.
+ */
+$updater = new Updater();
+$updater->setStrategy(Updater::STRATEGY_GITHUB);
+$updater->getStrategy()->setPackageName('myvendor/myapp');
+$updater->getStrategy()->setPharName('myapp.phar');
+$updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
+
+try {
+    $result = $updater->hasUpdate();
+    if ($result) {
+        echo(sprintf(
+            'The current stable build available remotely is: %s',
+            $updater->getNewVersion()
+        ));
+    } elseif (false === $updater->getNewVersion()) {
+        echo('There are no stable builds available.');
+    } else {
+        echo('You have the current stable build installed.');
+    }
+} catch (\Exception $e) {
+    exit('Well, something happened! Either an oopsie or something involving hackers.');
+}
 ```
 
 ### Avoid Post Update File Includes
