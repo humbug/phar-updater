@@ -137,6 +137,7 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($parser->isStable('1.0.0'));
         $this->assertFalse($parser->isStable('1.0.0b'));
         $this->assertFalse($parser->isStable('1.0.0-dev'));
+        $this->assertFalse($parser->isStable('1.0.0-alpha1-5-g5b46ad8'));
     }
 
     public function testIsPreRelease()
@@ -145,6 +146,7 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($parser->isPreRelease('1.0.0'));
         $this->assertTrue($parser->isPreRelease('1.0.0b'));
         $this->assertFalse($parser->isPreRelease('1.0.0-dev'));
+        $this->assertFalse($parser->isPreRelease('1.0.0-alpha1-5-g5b46ad8'));
     }
 
     public function testIsUnstable()
@@ -153,6 +155,7 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($parser->isUnstable('1.0.0'));
         $this->assertTrue($parser->isUnstable('1.0.0b'));
         $this->assertTrue($parser->isUnstable('1.0.0-dev'));
+        $this->assertTrue($parser->isUnstable('1.0.0-alpha1-5-g5b46ad8'));
     }
 
     public function testIsDevelopment()
@@ -161,5 +164,6 @@ class VersionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($parser->isDevelopment('1.0.0'));
         $this->assertFalse($parser->isDevelopment('1.0.0b'));
         $this->assertTrue($parser->isDevelopment('1.0.0-dev'));
+        $this->assertTrue($parser->isDevelopment('1.0.0-alpha1-5-g5b46ad8'));
     }
 }

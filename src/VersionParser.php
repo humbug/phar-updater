@@ -194,6 +194,9 @@ class VersionParser
         if ('dev-' === substr($version, 0, 4) || '-dev' === substr($version, -4)) {
             return true;
         }
+        if (1 == preg_match("/-\d+-[a-z0-9]{8,}$/", $version)) {
+            return true;
+        }
         return false;
     }
 }
