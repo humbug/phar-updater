@@ -42,7 +42,7 @@ Installation
 
 ```json
 require: {
-   "padraic/phar-updater": "~1.0@dev"
+   "padraic/phar-updater": "~1.0"
 }
 ```
 
