@@ -94,6 +94,7 @@ class Updater
      *
      * @param string $localPharFile
      * @param bool $hasPubKey
+     * @param string $strategy
      */
     public function __construct($localPharFile = null, $hasPubKey = true, $strategy = self::STRATEGY_SHA1)
     {
