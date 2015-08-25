@@ -40,10 +40,8 @@ based PHAR which you may freely reuse.
 Installation
 ============
 
-```json
-require: {
-   "padraic/phar-updater": "~1.0"
-}
+```
+composer require padraic/phar-updater
 ```
 
 The package utilises PHP Streams for remote requests so it will require the openssl
