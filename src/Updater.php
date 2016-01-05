@@ -20,7 +20,6 @@ use Humbug\SelfUpdate\Exception\NoSignatureException;
 use Humbug\SelfUpdate\Strategy\StrategyInterface;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
-use Symfony\Component\Finder\Finder;
 
 class Updater
 {
