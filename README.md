@@ -204,6 +204,7 @@ try {
     if (!$result) {
         echo "Failure!\n";
         exit(1);
+    }
     echo "Success!\n";
 } catch (\Exception $e) {
     echo "Well, something happened! Either an oopsie or something involving hackers.\n";
