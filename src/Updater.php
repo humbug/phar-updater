@@ -327,6 +327,13 @@ class Updater
 
     protected function backupPhar()
     {
+        $tempDirectory = $this->getTempDirectory();
+        if (!is_writable($tempDirectory)) {
+            throw new FilesystemException(sprintf(
+                'The directory is not writeable: %s.', $tempDirectory
+            ));
+        }
+
         $result = copy($this->getLocalPharFile(), $this->getBackupPharFile());
         if ($result === false) {
             $this->cleanupAfterError();
@@ -340,6 +347,13 @@ class Updater
 
     protected function downloadPhar()
     {
+        $tempDirectory = $this->getTempDirectory();
+        if (!is_writable($tempDirectory)) {
+            throw new FilesystemException(sprintf(
+                'The directory is not writeable: %s.', $tempDirectory
+            ));
+        }
+
         $this->strategy->download($this);
 
         if (!file_exists($this->getTempPharFile())) {
@@ -383,6 +397,13 @@ class Updater
 
     protected function restorePhar()
     {
+        $tempDirectory = $this->getTempDirectory();
+        if (!is_writable($tempDirectory)) {
+            throw new FilesystemException(sprintf(
+                'The directory is not writeable: %s.', $tempDirectory
+            ));
+        }
+
         $backup = $this->getRestorePharFile();
         if (!file_exists($backup)) {
             throw new RuntimeException(sprintf(
@@ -459,11 +480,6 @@ class Updater
     protected function setTempDirectory()
     {
         $tempDirectory = dirname($this->getLocalPharFile());
-        if (!is_writable($tempDirectory)) {
-            throw new FilesystemException(sprintf(
-                'The directory is not writeable: %s.', $tempDirectory
-            ));
-        }
         $this->tempDirectory = $tempDirectory;
     }
 
