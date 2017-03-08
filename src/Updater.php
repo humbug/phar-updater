@@ -371,7 +371,14 @@ class Updater
 
     protected function replacePhar()
     {
-        rename($this->getTempPharFile(), $this->getLocalPharFile());
+        $localPharFile = $this->getLocalPharFile();
+        if (!is_writable($localPharFile)) {
+            throw new FilesystemException(sprintf(
+                'The current phar file is not writeable and cannot be replaced: %s.',
+                $localPharFile
+            ));
+        }
+        rename($this->getTempPharFile(), $localPharFile);
     }
 
     protected function restorePhar()
@@ -383,7 +390,15 @@ class Updater
             ));
         }
         $this->validatePhar($backup);
-        return rename($backup, $this->getLocalPharFile());
+
+        $localPharFile = $this->getLocalPharFile();
+        if (!is_writable($localPharFile)) {
+            throw new FilesystemException(sprintf(
+                'The current phar file is not writeable and cannot be replaced: %s.',
+                $localPharFile
+            ));
+        }
+        return rename($backup, $localPharFile);
     }
 
     protected function getBackupPharFile()
@@ -424,12 +439,6 @@ class Updater
         if (!file_exists($localPharFile)) {
             throw new RuntimeException(sprintf(
                 'The set phar file does not exist: %s.', $localPharFile
-            ));
-        }
-        if (!is_writable($localPharFile)) {
-            throw new FilesystemException(sprintf(
-                'The current phar file is not writeable and cannot be replaced: %s.',
-                $localPharFile
             ));
         }
         $this->localPharFile = $localPharFile;
