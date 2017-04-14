@@ -1,22 +1,20 @@
 <?php
 /**
- * Humbug
+ * Humbug.
  *
  * @category   Humbug
- * @package    Humbug
- * @subpackage UnitTests
+ *
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/pharupdater/blob/master/LICENSE New BSD License
  */
 
 namespace Humbug\Test\SelfUpdate;
 
-use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
+use Humbug\SelfUpdate\Updater;
 
 class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
 {
-
     private $files;
 
     /** @var Updater */
@@ -29,8 +27,8 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
     public function setup()
     {
         $this->tmp = sys_get_temp_dir();
-        $this->files = __DIR__ . '/_files';
-        $this->updater = new Updater($this->files . '/test.phar', false, Updater::STRATEGY_GITHUB);
+        $this->files = __DIR__.'/_files';
+        $this->updater = new Updater($this->files.'/test.phar', false, Updater::STRATEGY_GITHUB);
     }
 
     public function teardown()
@@ -104,35 +102,34 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->createTestPharAndKey();
-        $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
+        $this->assertEquals('old', $this->getPharOutput($this->tmp.'/old.phar'));
 
-        $updater = new Updater($this->tmp . '/old.phar');
-        $updater->setStrategyObject(new GithubTestStrategy);
+        $updater = new Updater($this->tmp.'/old.phar');
+        $updater->setStrategyObject(new GithubTestStrategy());
         $updater->getStrategy()->setPharName('new.phar');
         $updater->getStrategy()->setPackageName(''); // not used in this test
         $updater->getStrategy()->setCurrentLocalVersion('1.0.0');
 
         $this->assertTrue($updater->update());
-        $this->assertEquals('new', $this->getPharOutput($this->tmp . '/old.phar'));
+        $this->assertEquals('new', $this->getPharOutput($this->tmp.'/old.phar'));
     }
 
     /**
-     * Helpers
+     * Helpers.
      */
-
     private function getPharOutput($path)
     {
-        return exec('php ' . escapeshellarg($path));
+        return exec('php '.escapeshellarg($path));
     }
 
     private function deleteTempPhars()
     {
-        @unlink($this->tmp . '/old.phar');
-        @unlink($this->tmp . '/old.phar.pubkey');
-        @unlink($this->tmp . '/releases/download/1.0.1/new.phar');
-        @unlink($this->tmp . '/releases/download/1.0.1/new.phar.pubkey');
-        @unlink($this->tmp . '/old.1c7049180abee67826d35ce308c38272242b64b8.phar');
-        @unlink($this->tmp . '/package.json');
+        @unlink($this->tmp.'/old.phar');
+        @unlink($this->tmp.'/old.phar.pubkey');
+        @unlink($this->tmp.'/releases/download/1.0.1/new.phar');
+        @unlink($this->tmp.'/releases/download/1.0.1/new.phar.pubkey');
+        @unlink($this->tmp.'/old.1c7049180abee67826d35ce308c38272242b64b8.phar');
+        @unlink($this->tmp.'/package.json');
     }
 
     private function createTestPharAndKey()
@@ -145,19 +142,19 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         );
         @mkdir($this->tmp.'/releases/download/1.0.1', 0755, true);
         copy($this->files.'/build/new.phar', $this->tmp.'/releases/download/1.0.1/new.phar');
-        file_put_contents($this->tmp . '/package.json', json_encode(array(
-            'package' => array(
-                'versions' => array(
-                    '1.0.1' => array(
-                        'source' => array(
-                            'url' => 'file://' . $this->tmp . '.git'
-                        )
-                    ),
-                    '1.0.0' => array(
-                    )
-                )
-            )
-        )));
+        file_put_contents($this->tmp.'/package.json', json_encode([
+            'package' => [
+                'versions' => [
+                    '1.0.1' => [
+                        'source' => [
+                            'url' => 'file://'.$this->tmp.'.git',
+                        ],
+                    ],
+                    '1.0.0' => [
+                    ],
+                ],
+            ],
+        ]));
     }
 }
 
@@ -165,6 +162,6 @@ class GithubTestStrategy extends GithubStrategy
 {
     protected function getApiUrl()
     {
-        return 'file://' . sys_get_temp_dir() . '/package.json';
+        return 'file://'.sys_get_temp_dir().'/package.json';
     }
 }

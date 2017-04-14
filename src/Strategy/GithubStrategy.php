@@ -1,9 +1,9 @@
 <?php
 /**
- * Humbug
+ * Humbug.
  *
  * @category   Humbug
- * @package    Humbug
+ *
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
  *
@@ -12,15 +12,14 @@
 
 namespace Humbug\SelfUpdate\Strategy;
 
-use Humbug\SelfUpdate\Updater;
-use Humbug\SelfUpdate\VersionParser;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\JsonParsingException;
+use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\VersionParser;
 
 class GithubStrategy implements StrategyInterface
 {
-
     const API_URL = 'https://packagist.org/packages/%s.json';
 
     const STABLE = 'stable';
@@ -63,12 +62,13 @@ class GithubStrategy implements StrategyInterface
      * Download the remote Phar file.
      *
      * @param Updater $updater
+     *
      * @return void
      */
     public function download(Updater $updater)
     {
-        /** Switch remote request errors to HttpRequestExceptions */
-        set_error_handler(array($updater, 'throwHttpRequestException'));
+        /* Switch remote request errors to HttpRequestExceptions */
+        set_error_handler([$updater, 'throwHttpRequestException']);
         $result = humbug_get_contents($this->remoteUrl);
         restore_error_handler();
         if (false === $result) {
@@ -84,12 +84,13 @@ class GithubStrategy implements StrategyInterface
      * Retrieve the current version available remotely.
      *
      * @param Updater $updater
+     *
      * @return string|bool
      */
     public function getCurrentRemoteVersion(Updater $updater)
     {
-        /** Switch remote request errors to HttpRequestExceptions */
-        set_error_handler(array($updater, 'throwHttpRequestException'));
+        /* Switch remote request errors to HttpRequestExceptions */
+        set_error_handler([$updater, 'throwHttpRequestException']);
         $packageUrl = $this->getApiUrl();
         $package = json_decode(humbug_get_contents($packageUrl), true);
         restore_error_handler();
@@ -97,7 +98,7 @@ class GithubStrategy implements StrategyInterface
         if (null === $package || json_last_error() !== JSON_ERROR_NONE) {
             throw new JsonParsingException(
                 'Error parsing JSON package data'
-                . (function_exists('json_last_error_msg') ? ': ' . json_last_error_msg() : '')
+                .(function_exists('json_last_error_msg') ? ': '.json_last_error_msg() : '')
             );
         }
 
@@ -111,7 +112,7 @@ class GithubStrategy implements StrategyInterface
             $this->remoteVersion = $versionParser->getMostRecentAll();
         }
 
-        /**
+        /*
          * Setup remote URL if there's an actual version to download
          */
         if (!empty($this->remoteVersion)) {
@@ -125,6 +126,7 @@ class GithubStrategy implements StrategyInterface
      * Retrieve the current version of the local phar file.
      *
      * @param Updater $updater
+     *
      * @return string
      */
     public function getCurrentLocalVersion(Updater $updater)
@@ -133,7 +135,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Set version string of the local phar
+     * Set version string of the local phar.
      *
      * @param string $version
      */
@@ -143,7 +145,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Set Package name
+     * Set Package name.
      *
      * @param string $name
      */
@@ -153,7 +155,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Get Package name
+     * Get Package name.
      *
      * @return string
      */
@@ -163,7 +165,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Set phar file's name
+     * Set phar file's name.
      *
      * @param string $name
      */
@@ -173,7 +175,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Get phar file's name
+     * Get phar file's name.
      *
      * @return string
      */
@@ -183,7 +185,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Set target stability
+     * Set target stability.
      *
      * @param string $stability
      */
@@ -198,7 +200,7 @@ class GithubStrategy implements StrategyInterface
     }
 
     /**
-     * Get target stability
+     * Get target stability.
      *
      * @return string
      */
@@ -225,6 +227,7 @@ class GithubStrategy implements StrategyInterface
             $this->remoteVersion,
             $this->getPharName()
         );
+
         return $downloadUrl;
     }
 }
