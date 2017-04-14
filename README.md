@@ -135,7 +135,7 @@ phars which are released to a specific numbered version.
 
 ### Github Release Strategy
 
-Beyond development or nightly phars, if you are released numbered versions on
+Beyond development or nightly phars, if you are releasing numbered versions on
 Github (i.e. tags), you can upload additional files (such as phars) to include in
 the Github Release.
 
@@ -299,7 +299,7 @@ likely needed prior to updating, or disable their loading if not essential.
 ### Custom Update Strategies
 
 All update strategies revolve around checking for updates, and downloading updates.
-The actual work behind replacing local files and backups is handled separate.
+The actual work behind replacing local files and backups is handled separately.
 To create a custom strategy, you can implement `Humbug\SelfUpdate\Strategy\StrategyInterface`
 and pass a new instance of your implementation post-construction.
 
