@@ -1,7 +1,8 @@
 PHAR Updater
 ============
 
-[![Build Status](https://travis-ci.org/padraic/phar-updater.svg?branch=master)](https://travis-ci.org/padraic/phar-updater)
+[![Build Status](https://travis-ci.org/humbug/phar-updater.svg)](https://travis-ci.org/humbug/phar-updater) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/humbug/phar-updater/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/humbug/phar-updater/?branch=master)
+[![StyleCI](https://styleci.io/repos/31231488/shield?style=flat)](https://styleci.io/repos/31231488)
 
 You have a phar file to distribute, and it's all the rage to include a self-update
 command. Do you really need to write that? Here at Humbug Central, our army of
