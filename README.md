@@ -78,9 +78,10 @@ $updater->getStrategy()->setPharUrl('https://example.com/current.phar');
 $updater->getStrategy()->setVersionUrl('https://example.com/current.version');
 try {
     $result = $updater->update();
-    $result ? exit('Updated!') : exit('No update needed!');
+    echo $result ? "Updated!\n" : "No update needed!\n";
 } catch (\Exception $e) {
-    exit('Well, something happened! Either an oopsie or something involving hackers.');
+    echo "Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
 }
 ```
 
@@ -99,9 +100,10 @@ $updater->getStrategy()->setPharUrl('https://example.com/current.phar');
 $updater->getStrategy()->setVersionUrl('https://example.com/current.version');
 try {
     $result = $updater->update();
-    $result ? exit('Updated!') : exit('No update needed!');
+    echo $result ? "Updated!\n" : "No update needed!\n";
 } catch (\Exception $e) {
-    exit('Well, something happened! Either an oopsie or something involving hackers.');
+    echo "Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
 }
 ```
 
@@ -118,14 +120,15 @@ try {
     if ($result) {
         $new = $updater->getNewVersion();
         $old = $updater->getOldVersion();
-        exit(sprintf(
+        printf(
             'Updated from SHA-1 %s to SHA-1 %s', $old, $new
-        ));
+        );
     } else {
-        exit('No update needed!')
+        echo "No update needed!\n";
     }
 } catch (\Exception $e) {
-    exit('Well, something happened! Either an oopsie or something involving hackers.');
+    echo "Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
 }
 ```
 
@@ -154,9 +157,10 @@ $updater->getStrategy()->setPharName('myapp.phar');
 $updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
 try {
     $result = $updater->update();
-    $result ? exit('Updated!') : exit('No update needed!');
+    echo $result ? "Updated!\n" : "No update needed!\n";
 } catch (\Exception $e) {
-    exit('Well, something happened! Either an oopsie or something involving hackers.');
+    echo 'Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
 }
 ```
 
@@ -198,9 +202,14 @@ use Humbug\SelfUpdate\Updater;
 $updater = new Updater();
 try {
     $result = $updater->rollback();
-    $result ? exit('Success!') : exit('Failure!');
+    if (!$result) {
+        echo "Failure!\n";
+        exit(1);
+    }
+    echo "Success!\n";
 } catch (\Exception $e) {
-    exit('Well, something happened! Either an oopsie or something involving hackers.');
+    echo "Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
 }
 ```
 
@@ -269,17 +278,18 @@ $updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
 try {
     $result = $updater->hasUpdate();
     if ($result) {
-        echo(sprintf(
+        printf(
             'The current stable build available remotely is: %s',
             $updater->getNewVersion()
-        ));
+        );
     } elseif (false === $updater->getNewVersion()) {
-        echo('There are no stable builds available.');
+        echo "There are no stable builds available.\n";
     } else {
-        echo('You have the current stable build installed.');
+        echo "You have the current stable build installed.\n";
     }
 } catch (\Exception $e) {
-    exit('Well, something happened! Either an oopsie or something involving hackers.');
+    echo "Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
 }
 ```
 
