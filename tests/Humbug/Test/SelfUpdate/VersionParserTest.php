@@ -11,9 +11,10 @@
 
 namespace Humbug\Test\SelfUpdate;
 
+use PHPUnit\Framework\TestCase;
 use Humbug\SelfUpdate\VersionParser;
 
-class VersionParserTest extends \PHPUnit_Framework_TestCase
+class VersionParserTest extends TestCase
 {
 
     // Stable Versions
