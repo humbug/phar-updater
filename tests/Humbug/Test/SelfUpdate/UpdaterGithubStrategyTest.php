@@ -16,7 +16,6 @@ use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
 class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
 {
-
     private $files;
 
     /** @var Updater */

@@ -16,7 +16,6 @@ use Humbug\SelfUpdate\Strategy\StrategyInterface;
 
 class UpdaterTest extends \PHPUnit_Framework_TestCase
 {
-
     private $files;
 
     /** @var Updater */

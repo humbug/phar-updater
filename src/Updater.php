@@ -23,7 +23,6 @@ use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
 class Updater
 {
-
     const STRATEGY_SHA1 = 'sha1';
 
     const STRATEGY_GITHUB = 'github';

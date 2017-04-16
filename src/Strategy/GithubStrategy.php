@@ -20,7 +20,6 @@ use Humbug\SelfUpdate\Exception\JsonParsingException;
 
 class GithubStrategy implements StrategyInterface
 {
-
     const API_URL = 'https://packagist.org/packages/%s.json';
 
     const STABLE = 'stable';
