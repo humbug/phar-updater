@@ -19,12 +19,15 @@ use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\NoSignatureException;
 use Humbug\SelfUpdate\Strategy\StrategyInterface;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
+use Humbug\SelfUpdate\Strategy\Sha256Strategy;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
 class Updater
 {
 
     const STRATEGY_SHA1 = 'sha1';
+
+    const STRATEGY_SHA256 = 'sha256';
 
     const STRATEGY_GITHUB = 'github';
 
@@ -162,6 +165,10 @@ class Updater
         switch ($strategy) {
             case self::STRATEGY_GITHUB:
                 $this->strategy = new GithubStrategy;
+                break;
+
+            case self::STRATEGY_SHA256:
+                $this->strategy = new Sha256Strategy;
                 break;
 
             default:
@@ -348,13 +355,21 @@ class Updater
             );
         }
 
-        if ($this->getStrategy() instanceof ShaStrategy) {
-            $tmpVersion = sha1_file($this->getTempPharFile());
+        if ($this->getStrategy() instanceof ShaStrategy
+        || $this->getStrategy() instanceof Sha256Strategy) {
+            if ($this->getStrategy() instanceof ShaStrategy) {
+                $tmpVersion = sha1_file($this->getTempPharFile());
+                $algo = 'SHA-1';
+            } else {
+                $tmpVersion = hash_file('sha256', $this->getTempPharFile());
+                $algo = 'SHA-256';
+            }
             if ($tmpVersion !== $this->getNewVersion()) {
                 $this->cleanupAfterError();
                 throw new HttpRequestException(sprintf(
                     'Download file appears to be corrupted or outdated. The file '
-                        . 'received does not have the expected SHA-1 hash: %s.',
+                        . 'received does not have the expected %s hash: %s.',
+                    $algo,
                     $this->getNewVersion()
                 ));
             }
