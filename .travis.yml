@@ -26,7 +26,7 @@ before_install:
     - composer self-update
 
 before_script:
-    - travis_retry composer install --no-interaction
+    - travis_retry composer install --no-interaction --prefer-dist
 
 script:
     - vendor/bin/phpunit --coverage-text
