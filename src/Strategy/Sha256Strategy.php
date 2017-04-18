@@ -16,7 +16,7 @@ use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 
-class Sha256Strategy extends ShaStrategyAbstract
+final class Sha256Strategy extends ShaStrategyAbstract
 {
 
     /**

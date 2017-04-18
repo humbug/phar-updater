@@ -16,6 +16,9 @@ use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 
+/**
+ * @deprecated 1.0.4 SHA-1 is increasingly susceptible to collision attacks; use SHA-256
+ */
 class ShaStrategy extends ShaStrategyAbstract
 {
 
