@@ -87,11 +87,11 @@ class UpdaterGithubStrategyTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException Humbug\SelfUpdate\Exception\InvalidArgumentException
+     */
     public function testSetStabilityThrowsExceptionOnInvalidStabilityValue()
     {
-        $this->expectException(
-            'Humbug\\SelfUpdate\\Exception\\InvalidArgumentException'
-        );
         $this->updater->getStrategy()->setStability('foo');
     }
 
