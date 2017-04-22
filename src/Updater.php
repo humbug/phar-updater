@@ -1,9 +1,9 @@
 <?php
 /**
- * Humbug
+ * Humbug.
  *
  * @category   Humbug
- * @package    Humbug
+ *
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
  *
@@ -12,18 +12,17 @@
 
 namespace Humbug\SelfUpdate;
 
-use Humbug\SelfUpdate\Exception\RuntimeException;
-use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\FilesystemException;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
+use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\NoSignatureException;
-use Humbug\SelfUpdate\Strategy\StrategyInterface;
-use Humbug\SelfUpdate\Strategy\ShaStrategy;
+use Humbug\SelfUpdate\Exception\RuntimeException;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
+use Humbug\SelfUpdate\Strategy\ShaStrategy;
+use Humbug\SelfUpdate\Strategy\StrategyInterface;
 
 class Updater
 {
-
     const STRATEGY_SHA1 = 'sha1';
 
     const STRATEGY_GITHUB = 'github';
@@ -89,10 +88,10 @@ class Updater
     protected $newVersionAvailable;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $localPharFile
-     * @param bool $hasPubKey
+     * @param bool   $hasPubKey
      * @param string $strategy
      */
     public function __construct($localPharFile = null, $hasPubKey = true, $strategy = self::STRATEGY_SHA1)
@@ -114,18 +113,19 @@ class Updater
     }
 
     /**
-     * Check for update
+     * Check for update.
      *
      * @return bool
      */
     public function hasUpdate()
     {
         $this->newVersionAvailable = $this->newVersionAvailable();
+
         return $this->newVersionAvailable;
     }
 
     /**
-     * Perform an update
+     * Perform an update.
      *
      * @return bool
      */
@@ -138,11 +138,12 @@ class Updater
         $this->backupPhar();
         $this->downloadPhar();
         $this->replacePhar();
+
         return true;
     }
 
     /**
-     * Perform an rollback to previous version
+     * Perform an rollback to previous version.
      *
      * @return bool
      */
@@ -151,6 +152,7 @@ class Updater
         if (!$this->restorePhar()) {
             return false;
         }
+
         return true;
     }
 
@@ -161,11 +163,11 @@ class Updater
     {
         switch ($strategy) {
             case self::STRATEGY_GITHUB:
-                $this->strategy = new GithubStrategy;
+                $this->strategy = new GithubStrategy();
                 break;
 
             default:
-                $this->strategy = new ShaStrategy;
+                $this->strategy = new ShaStrategy();
                 break;
         }
     }
@@ -181,7 +183,7 @@ class Updater
     }
 
     /**
-     * Set backup extension for old phar versions
+     * Set backup extension for old phar versions.
      *
      * @param string $extension
      */
@@ -191,7 +193,7 @@ class Updater
     }
 
     /**
-     * Get backup extension for old phar versions
+     * Get backup extension for old phar versions.
      *
      * @return string
      */
@@ -223,8 +225,8 @@ class Updater
     public function getTempPharFile()
     {
         return $this->getTempDirectory()
-            . '/'
-            . sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
+            .'/'
+            .sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
     }
 
     public function getNewVersion()
@@ -238,7 +240,7 @@ class Updater
     }
 
     /**
-     * Set backup path for old phar versions
+     * Set backup path for old phar versions.
      *
      * @param string $filePath
      */
@@ -259,7 +261,7 @@ class Updater
     }
 
     /**
-     * Get backup path for old phar versions
+     * Get backup path for old phar versions.
      *
      * @return string
      */
@@ -269,7 +271,7 @@ class Updater
     }
 
     /**
-     * Set path for the backup phar to rollback/restore from
+     * Set path for the backup phar to rollback/restore from.
      *
      * @param string $filePath
      */
@@ -290,7 +292,7 @@ class Updater
     }
 
     /**
-     * Get path for the backup phar to rollback/restore from
+     * Get path for the backup phar to rollback/restore from.
      *
      * @return string
      */
@@ -322,6 +324,7 @@ class Updater
         if (!empty($this->newVersion) && ($this->newVersion !== $this->oldVersion)) {
             return true;
         }
+
         return false;
     }
 
@@ -354,7 +357,7 @@ class Updater
                 $this->cleanupAfterError();
                 throw new HttpRequestException(sprintf(
                     'Download file appears to be corrupted or outdated. The file '
-                        . 'received does not have the expected SHA-1 hash: %s.',
+                        .'received does not have the expected SHA-1 hash: %s.',
                     $this->getNewVersion()
                 ));
             }
@@ -383,6 +386,7 @@ class Updater
             ));
         }
         $this->validatePhar($backup);
+
         return rename($backup, $this->getLocalPharFile());
     }
 
@@ -391,9 +395,10 @@ class Updater
         if (null !== $this->getBackupPath()) {
             return $this->getBackupPath();
         }
+
         return $this->getTempDirectory()
-            . '/'
-            . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension());
+            .'/'
+            .sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension());
     }
 
     protected function getRestorePharFile()
@@ -401,17 +406,18 @@ class Updater
         if (null !== $this->getRestorePath()) {
             return $this->getRestorePath();
         }
+
         return $this->getTempDirectory()
-            . '/'
-            . sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
+            .'/'
+            .sprintf('%s%s', $this->getLocalPharFileBasename(), $this->getBackupExtension()
         );
     }
 
     protected function getTempPubKeyFile()
     {
         return $this->getTempDirectory()
-            . '/'
-            . sprintf('%s.phar.temp.pubkey', $this->getLocalPharFileBasename());
+            .'/'
+            .sprintf('%s.phar.temp.pubkey', $this->getLocalPharFileBasename());
     }
 
     protected function setLocalPharFile($localPharFile)
@@ -438,7 +444,7 @@ class Updater
 
     protected function setLocalPubKeyFile()
     {
-        $localPubKeyFile = $this->getLocalPharFile() . '.pubkey';
+        $localPubKeyFile = $this->getLocalPharFile().'.pubkey';
         if (!file_exists($localPubKeyFile)) {
             throw new RuntimeException(sprintf(
                 'The phar pubkey file does not exist: %s.', $localPubKeyFile
@@ -462,11 +468,11 @@ class Updater
     {
         $phar = realpath($phar);
         if ($this->hasPubKey()) {
-            copy($this->getLocalPubKeyFile(), $phar . '.pubkey');
+            copy($this->getLocalPubKeyFile(), $phar.'.pubkey');
         }
         chmod($phar, fileperms($this->getLocalPharFile()));
-        /** Switch invalid key errors to RuntimeExceptions */
-        set_error_handler(array($this, 'throwRuntimeException'));
+        /* Switch invalid key errors to RuntimeExceptions */
+        set_error_handler([$this, 'throwRuntimeException']);
         $phar = new \Phar($phar);
         $signature = $phar->getSignature();
         if ($this->hasPubKey() && strtolower($signature['hash_type']) !== 'openssl') {
@@ -476,7 +482,7 @@ class Updater
         }
         restore_error_handler();
         if ($this->hasPubKey()) {
-            @unlink($phar . '.pubkey');
+            @unlink($phar.'.pubkey');
         }
         unset($phar);
     }

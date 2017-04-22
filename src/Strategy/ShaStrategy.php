@@ -1,9 +1,9 @@
 <?php
 /**
- * Humbug
+ * Humbug.
  *
  * @category   Humbug
- * @package    Humbug
+ *
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
  *
@@ -12,13 +12,12 @@
 
 namespace Humbug\SelfUpdate\Strategy;
 
-use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
+use Humbug\SelfUpdate\Updater;
 
 class ShaStrategy implements StrategyInterface
 {
-
     /**
      * @var string
      */
@@ -33,12 +32,13 @@ class ShaStrategy implements StrategyInterface
      * Download the remote Phar file.
      *
      * @param Updater $updater
+     *
      * @return void
      */
     public function download(Updater $updater)
     {
-        /** Switch remote request errors to HttpRequestExceptions */
-        set_error_handler(array($updater, 'throwHttpRequestException'));
+        /* Switch remote request errors to HttpRequestExceptions */
+        set_error_handler([$updater, 'throwHttpRequestException']);
         $result = humbug_get_contents($this->getPharUrl());
         restore_error_handler();
         if (false === $result) {
@@ -54,12 +54,13 @@ class ShaStrategy implements StrategyInterface
      * Retrieve the current version available remotely.
      *
      * @param Updater $updater
+     *
      * @return string|bool
      */
     public function getCurrentRemoteVersion(Updater $updater)
     {
-        /** Switch remote request errors to HttpRequestExceptions */
-        set_error_handler(array($updater, 'throwHttpRequestException'));
+        /* Switch remote request errors to HttpRequestExceptions */
+        set_error_handler([$updater, 'throwHttpRequestException']);
         $version = humbug_get_contents($this->getVersionUrl());
         restore_error_handler();
         if (false === $version) {
@@ -85,6 +86,7 @@ class ShaStrategy implements StrategyInterface
      * Retrieve the current version of the local phar file.
      *
      * @param Updater $updater
+     *
      * @return string
      */
     public function getCurrentLocalVersion(Updater $updater)
@@ -93,7 +95,7 @@ class ShaStrategy implements StrategyInterface
     }
 
     /**
-     * Set URL to phar file
+     * Set URL to phar file.
      *
      * @param string $url
      */
@@ -108,7 +110,7 @@ class ShaStrategy implements StrategyInterface
     }
 
     /**
-     * Get URL for phar file
+     * Get URL for phar file.
      *
      * @return string
      */
@@ -118,7 +120,7 @@ class ShaStrategy implements StrategyInterface
     }
 
     /**
-     * Set URL to version file
+     * Set URL to version file.
      *
      * @param string $url
      */
@@ -133,7 +135,7 @@ class ShaStrategy implements StrategyInterface
     }
 
     /**
-     * Get URL for version file
+     * Get URL for version file.
      *
      * @return string
      */
@@ -145,9 +147,10 @@ class ShaStrategy implements StrategyInterface
     protected function validateAllowedUrl($url)
     {
         if (filter_var($url, FILTER_VALIDATE_URL)
-        && in_array(parse_url($url, PHP_URL_SCHEME), array('http', 'https', 'file'))) {
+        && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https', 'file'])) {
             return true;
         }
+
         return false;
     }
 }

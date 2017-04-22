@@ -1,9 +1,9 @@
 <?php
 /**
- * Humbug
+ * Humbug.
  *
  * @category   Humbug
- * @package    Humbug
+ *
  * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
  *
@@ -14,7 +14,6 @@ namespace Humbug\SelfUpdate;
 
 class VersionParser
 {
-
     /**
      * @var array
      */
@@ -28,14 +27,14 @@ class VersionParser
     /**
      * @param array $versions
      */
-    public function __construct(array $versions = array())
+    public function __construct(array $versions = [])
     {
         $this->versions = $versions;
     }
 
     /**
      * Get the most recent stable numbered version from versions passed to
-     * constructor (if any)
+     * constructor (if any).
      *
      * @return string
      */
@@ -46,7 +45,7 @@ class VersionParser
 
     /**
      * Get the most recent unstable numbered version from versions passed to
-     * constructor (if any)
+     * constructor (if any).
      *
      * @return string
      */
@@ -57,7 +56,7 @@ class VersionParser
 
     /**
      * Get the most recent stable or unstable numbered version from versions passed to
-     * constructor (if any)
+     * constructor (if any).
      *
      * @return string
      */
@@ -67,9 +66,10 @@ class VersionParser
     }
 
     /**
-     * Checks if given version string represents a stable numbered version
+     * Checks if given version string represents a stable numbered version.
      *
      * @param string $version
+     *
      * @return bool
      */
     public function isStable($version)
@@ -82,6 +82,7 @@ class VersionParser
      * it's unstable but not development level.
      *
      * @param string $version
+     *
      * @return bool
      */
     public function isPreRelease($version)
@@ -91,9 +92,10 @@ class VersionParser
 
     /**
      * Checks if given version string represents an unstable or dev-level
-     * numbered version
+     * numbered version.
      *
      * @param string $version
+     *
      * @return bool
      */
     public function isUnstable($version)
@@ -102,9 +104,10 @@ class VersionParser
     }
 
     /**
-     * Checks if given version string represents a dev-level numbered version
+     * Checks if given version string represents a dev-level numbered version.
      *
      * @param string $version
+     *
      * @return bool
      */
     public function isDevelopment($version)
@@ -114,7 +117,7 @@ class VersionParser
 
     private function selectRecentStable()
     {
-        $candidates = array();
+        $candidates = [];
         foreach ($this->versions as $version) {
             if (!$this->stable($version)) {
                 continue;
@@ -124,12 +127,13 @@ class VersionParser
         if (empty($candidates)) {
             return false;
         }
+
         return $this->findMostRecent($candidates);
     }
 
     private function selectRecentUnstable()
     {
-        $candidates = array();
+        $candidates = [];
         foreach ($this->versions as $version) {
             if ($this->stable($version) || $this->development($version)) {
                 continue;
@@ -139,12 +143,13 @@ class VersionParser
         if (empty($candidates)) {
             return false;
         }
+
         return $this->findMostRecent($candidates);
     }
 
     private function selectRecentAll()
     {
-        $candidates = array();
+        $candidates = [];
         foreach ($this->versions as $version) {
             if ($this->development($version)) {
                 continue;
@@ -154,6 +159,7 @@ class VersionParser
         if (empty($candidates)) {
             return false;
         }
+
         return $this->findMostRecent($candidates);
     }
 
@@ -166,6 +172,7 @@ class VersionParser
                 $candidate = $version;
             }
         }
+
         return $candidate;
     }
 
@@ -186,6 +193,7 @@ class VersionParser
                 return false;
             }
         }
+
         return true;
     }
 
@@ -197,6 +205,7 @@ class VersionParser
         if (1 == preg_match("/-\d+-[a-z0-9]{8,}$/", $version)) {
             return true;
         }
+
         return false;
     }
 }
