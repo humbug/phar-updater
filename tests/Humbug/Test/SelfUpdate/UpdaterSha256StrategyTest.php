@@ -13,8 +13,9 @@ namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\Sha256Strategy;
+use PHPUnit\Framework\TestCase;
 
-class UpdaterSha256StrategyTest extends \PHPUnit_Framework_TestCase
+class UpdaterSha256StrategyTest extends TestCase
 {
 
     private $files;
@@ -66,7 +67,7 @@ class UpdaterSha256StrategyTest extends \PHPUnit_Framework_TestCase
 
     public function testSetPharUrlThrowsExceptionOnInvalidUrl()
     {
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
+        $this->expectException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
         $this->updater->getStrategy()->setPharUrl('silly:///home/padraic');
     }
 
@@ -81,7 +82,7 @@ class UpdaterSha256StrategyTest extends \PHPUnit_Framework_TestCase
 
     public function testSetVersionUrlThrowsExceptionOnInvalidUrl()
     {
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
+        $this->expectException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
         $this->updater->getStrategy()->setVersionUrl('silly:///home/padraic');
     }
 
@@ -101,7 +102,7 @@ class UpdaterSha256StrategyTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionOnEmptyRemoteVersion()
     {
-        $this->setExpectedException(
+        $this->expectException(
             'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
             'Version request returned empty response'
         );
@@ -111,7 +112,7 @@ class UpdaterSha256StrategyTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionOnInvalidRemoteVersion()
     {
-        $this->setExpectedException(
+        $this->expectException(
             'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
             'Version request returned incorrectly formatted response'
         );
