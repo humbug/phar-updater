@@ -13,6 +13,7 @@ namespace Humbug\Test\SelfUpdate;
 
 use PHPUnit\Framework\TestCase;
 use Humbug\SelfUpdate\VersionParser;
+use PHPUnit\Framework\TestCase;
 
 class VersionParserTest extends TestCase
 {
