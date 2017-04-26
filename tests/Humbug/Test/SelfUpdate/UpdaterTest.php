@@ -13,10 +13,10 @@ namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\StrategyInterface;
+use PHPUnit\Framework\TestCase;
 
-class UpdaterTest extends \PHPUnit_Framework_TestCase
+class UpdaterTest extends TestCase
 {
-
     private $files;
 
     /** @var Updater */
@@ -24,7 +24,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     private $tmp;
 
-    public function setup()
+    public function setUp()
     {
         $this->tmp = sys_get_temp_dir();
         $this->files = __DIR__ . '/_files';
@@ -32,7 +32,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->updater = new Updater($this->files . '/test.phar');
     }
 
-    public function teardown()
+    public function tearDown()
     {
         $this->deleteTempPhars();
     }
@@ -59,7 +59,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructorThrowsExceptionIfPubKeyNotExistsButFlagTrue()
     {
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
+        $this->expectException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
         $updater = new Updater($this->files . '/test-nopubkey.phar');
     }
 
@@ -80,7 +80,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testSetPharUrlThrowsExceptionOnInvalidUrl()
     {
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
+        $this->expectException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
         $this->updater->getStrategy()->setPharUrl('silly:///home/padraic');
     }
 
@@ -95,7 +95,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testSetVersionUrlThrowsExceptionOnInvalidUrl()
     {
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
+        $this->expectException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
         $this->updater->getStrategy()->setVersionUrl('silly:///home/padraic');
     }
 
@@ -109,7 +109,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionOnEmptyRemoteVersion()
     {
-        $this->setExpectedException(
+        $this->expectException(
             'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
             'Version request returned empty response'
         );
@@ -119,7 +119,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionOnInvalidRemoteVersion()
     {
-        $this->setExpectedException(
+        $this->expectException(
             'Humbug\\SelfUpdate\\Exception\\HttpRequestException',
             'Version request returned incorrectly formatted response'
         );
@@ -160,7 +160,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/new.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/new.version');
 
-        $this->setExpectedException('UnexpectedValueException');
+        $this->expectException('UnexpectedValueException');
         $updater->update();
     }
 
@@ -187,7 +187,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
         /** Signature check should fail with invalid signature by a different privkey */
-        $this->setExpectedException('UnexpectedValueException');
+        $this->expectException('UnexpectedValueException');
 
         $updater = new Updater($this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/badsig.phar');
@@ -206,7 +206,7 @@ class UpdaterTest extends \PHPUnit_Framework_TestCase
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/nosig.version');
 
         /** If newly download phar lacks an expected signature, an exception should be thrown */
-        $this->setExpectedException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
+        $this->expectException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
         $updater->update();
     }
 

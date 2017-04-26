@@ -13,10 +13,10 @@ namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
+use PHPUnit\Framework\TestCase;
 
-class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
+class UpdaterGithubStrategyTest extends TestCase
 {
-
     private $files;
 
     /** @var Updater */
@@ -26,14 +26,14 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
 
     private $data;
 
-    public function setup()
+    public function setUp()
     {
         $this->tmp = sys_get_temp_dir();
         $this->files = __DIR__ . '/_files';
         $this->updater = new Updater($this->files . '/test.phar', false, Updater::STRATEGY_GITHUB);
     }
 
-    public function teardown()
+    public function tearDown()
     {
         $this->deleteTempPhars();
     }
@@ -88,7 +88,7 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
 
     public function testSetStabilityThrowsExceptionOnInvalidStabilityValue()
     {
-        $this->setExpectedException(
+        $this->expectException(
             'Humbug\\SelfUpdate\\Exception\\InvalidArgumentException'
         );
         $this->updater->getStrategy()->setStability('foo');
