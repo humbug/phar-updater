@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
 
 class UpdaterGithubStrategyTest extends TestCase
 {
-
     private $files;
 
     /** @var Updater */
