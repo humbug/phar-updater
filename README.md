@@ -268,8 +268,11 @@ use Humbug\SelfUpdate\Updater;
  * Configuration is identical in every way for actual updates. You can run this
  * across multiple configuration variants to get recent stable, unstable, and dev
  * versions available.
+ *
+ * This would configure update for an unsigned phar (second constructor must be
+ * false in this case).
  */
-$updater = new Updater();
+$updater = new Updater(null, false);
 $updater->setStrategy(Updater::STRATEGY_GITHUB);
 $updater->getStrategy()->setPackageName('myvendor/myapp');
 $updater->getStrategy()->setPharName('myapp.phar');
