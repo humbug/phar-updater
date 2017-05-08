@@ -12,6 +12,7 @@
 
 namespace Humbug\SelfUpdate;
 
+use Humbug\SelfUpdate\VersionParser;
 use Humbug\SelfUpdate\Exception\RuntimeException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\FilesystemException;
@@ -314,13 +315,28 @@ class Updater
         return $this->hasPubKey;
     }
 
+    /**
+     * Compares local and remote versions. If version strings do not follow
+     * Semver, i.e. hashes, the strings are just checked for equality.
+     * @return bool
+     */
     protected function newVersionAvailable()
     {
         $this->newVersion = $this->strategy->getCurrentRemoteVersion($this);
         $this->oldVersion = $this->strategy->getCurrentLocalVersion($this);
 
-        if (!empty($this->newVersion) && ($this->newVersion !== $this->oldVersion)) {
-            return true;
+        try {
+            if (!empty($this->newVersion)
+                && !VersionParser::equals($this->newVersion, $this->oldVersion)
+            ) {
+                return true;
+            }
+        } catch (\UnexpectedValueException $e) {
+            if (!empty($this->newVersion)
+                && ($this->newVersion !== $this->oldVersion)
+            ) {
+                return true;
+            }
         }
         return false;
     }

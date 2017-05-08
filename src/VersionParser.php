@@ -121,6 +121,20 @@ class VersionParser
         return $this->development($version);
     }
 
+    /**
+     * Checks if two version strings are the same normalised version.
+     * 
+     * @param  string
+     * @param  string
+     * @return bool
+     */
+    public static function equals($version1, $version2)
+    {
+        $parser = new Parser;
+        return $parser->normalize(self::stripGitHash($version1))
+            === $parser->normalize(self::stripGitHash($version2)); 
+    }
+
     private function selectRecentStable()
     {
         $candidates = array();
@@ -174,7 +188,7 @@ class VersionParser
 
     private function stable($version)
     {
-        if ('stable' === Parser::parseStability($this->stripGitHash($version))) {
+        if ('stable' === Parser::parseStability(self::stripGitHash($version))) {
             return true;
         }
         return false;
@@ -182,13 +196,13 @@ class VersionParser
 
     private function development($version)
     {
-        if ('dev' === Parser::parseStability($this->stripGitHash($version))) {
+        if ('dev' === Parser::parseStability(self::stripGitHash($version))) {
             return true;
         }
         return false;
     }
 
-    private function stripGitHash($version)
+    private static function stripGitHash($version)
     {
         if (preg_match(self::GIT_DATA_MATCH, $version, $matches)) {
             $version = str_replace($matches[1], '', $version);
