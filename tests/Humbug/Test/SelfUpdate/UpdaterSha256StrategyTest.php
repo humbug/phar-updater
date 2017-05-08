@@ -46,7 +46,7 @@ class UpdaterSha256StrategyTest extends TestCase
             $updater->getStrategy() instanceof Sha256Strategy
         );
     }
-    
+
 
     public function testGetCurrentLocalVersion()
     {

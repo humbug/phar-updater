@@ -356,7 +356,8 @@ class Updater
         }
 
         if ($this->getStrategy() instanceof ShaStrategy
-        || $this->getStrategy() instanceof Sha256Strategy) {
+            || $this->getStrategy() instanceof Sha256Strategy
+        ) {
             if ($this->getStrategy() instanceof ShaStrategy) {
                 $tmpVersion = sha1_file($this->getTempPharFile());
                 $algo = 'SHA-1';

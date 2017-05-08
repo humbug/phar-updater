@@ -19,6 +19,13 @@ use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 abstract class ShaStrategyAbstract implements StrategyInterface
 {
 
+    /** @private */
+    const SUPPORTED_SCHEMES = [
+        'http',
+        'https',
+        'file',
+    ];
+
     /**
      * @var string
      */
@@ -102,10 +109,9 @@ abstract class ShaStrategyAbstract implements StrategyInterface
 
     protected function validateAllowedUrl($url)
     {
-        if (filter_var($url, FILTER_VALIDATE_URL)
-        && in_array(parse_url($url, PHP_URL_SCHEME), array('http', 'https', 'file'))) {
-            return true;
-        }
-        return false;
+        return (
+            filter_var($url, FILTER_VALIDATE_URL)
+            && in_array(parse_url($url, PHP_URL_SCHEME), self::SUPPORTED_SCHEMES)
+        );
     }
 }
