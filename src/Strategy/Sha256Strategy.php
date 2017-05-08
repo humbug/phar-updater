@@ -18,7 +18,6 @@ use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 
 final class Sha256Strategy extends ShaStrategyAbstract
 {
-
     /**
      * Retrieve the current version available remotely.
      *
@@ -60,5 +59,4 @@ final class Sha256Strategy extends ShaStrategyAbstract
     {
         return hash_file('sha256', $updater->getLocalPharFile());
     }
-
 }

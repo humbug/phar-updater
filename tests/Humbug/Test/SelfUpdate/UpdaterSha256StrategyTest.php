@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
 
 class UpdaterSha256StrategyTest extends TestCase
 {
-
     private $files;
 
     /** @var Updater */
@@ -161,5 +160,4 @@ class UpdaterSha256StrategyTest extends TestCase
             $this->tmp.'/old.phar.pubkey'
         );
     }
-
 }

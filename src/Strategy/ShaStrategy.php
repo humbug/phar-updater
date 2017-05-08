@@ -63,5 +63,4 @@ class ShaStrategy extends ShaStrategyAbstract
     {
         return sha1_file($updater->getLocalPharFile());
     }
-
 }
