@@ -31,7 +31,7 @@ class VersionParser
     /**
      * @var string
      */
-    private const GIT_DATA_MATCH = '/.*(-\d+-g[[:alnum:]]{7})$/';
+    const GIT_DATA_MATCH = '/.*(-\d+-g[[:alnum:]]{7})$/';
 
     /**
      * @param array $versions
