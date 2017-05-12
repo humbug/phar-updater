@@ -338,6 +338,16 @@ class Updater
                 return true;
             }
         } catch (\UnexpectedValueException $e) {
+            if ($this->getStrategy() instanceof GithubStrategy) {
+                throw new RuntimeException(
+                    'The current reported version or the current remote version '
+                    . 'does not adhere to Semantic Versioning and cannot be compared.'
+                    . PHP_EOL
+                    . sprintf('Current version: %s', $this->oldVersion)
+                    . PHP_EOL
+                    . sprintf('Remote version: %s', $this->newVersion)
+                );
+            }
             if (!empty($this->newVersion)
                 && ($this->newVersion !== $this->oldVersion)
             ) {
