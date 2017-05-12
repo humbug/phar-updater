@@ -205,7 +205,7 @@ class VersionParser
     private static function stripGitHash($version)
     {
         if (preg_match(self::GIT_DATA_MATCH, $version, $matches)) {
-            $version = str_replace($matches[1], '', $version);
+            $version = str_replace($matches[1], '-dev', $version);
         }
         return $version;
     }
