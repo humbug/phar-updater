@@ -11,6 +11,7 @@
 
 namespace Humbug\Test\SelfUpdate;
 
+use PHPUnit\Framework\TestCase;
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\StrategyInterface;
 use PHPUnit\Framework\TestCase;
@@ -77,7 +78,7 @@ class UpdaterTest extends TestCase
         $this->updater->getStrategy()->setPharUrl('https://www.example.com');
         $this->assertEquals($this->updater->getStrategy()->getPharUrl(), 'https://www.example.com');
     }
-
+  
     public function testSetPharUrlThrowsExceptionOnInvalidUrl()
     {
         $this->expectException('Humbug\\SelfUpdate\\Exception\\InvalidArgumentException');
@@ -106,7 +107,7 @@ class UpdaterTest extends TestCase
         $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $this->updater->getOldVersion());
         $this->assertEquals('1af1b9c94dea1ff337587bfa9109f1dad1ec7b9b', $this->updater->getNewVersion());
     }
-
+  
     public function testThrowsExceptionOnEmptyRemoteVersion()
     {
         $this->expectException(
@@ -188,7 +189,6 @@ class UpdaterTest extends TestCase
 
         /** Signature check should fail with invalid signature by a different privkey */
         $this->expectException('UnexpectedValueException');
-
         $updater = new Updater($this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/badsig.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/badsig.version');

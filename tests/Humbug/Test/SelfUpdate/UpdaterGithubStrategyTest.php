@@ -11,6 +11,7 @@
 
 namespace Humbug\Test\SelfUpdate;
 
+use PHPUnit\Framework\TestCase;
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
 use PHPUnit\Framework\TestCase;
