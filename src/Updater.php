@@ -325,7 +325,10 @@ class Updater
         $this->newVersion = $this->strategy->getCurrentRemoteVersion($this);
         $this->oldVersion = $this->strategy->getCurrentLocalVersion($this);
 
-        if (!empty($this->newVersion) && ($this->newVersion !== $this->oldVersion)) {
+        if (!empty($this->newVersion) && $this->newVersion !== $this->oldVersion) {
+            if (!$this->strategy instanceof ShaStrategy && !version_compare($this->newVersion, $this->oldVersion, '>')) {
+                return false;
+            }
             return true;
         }
         return false;
