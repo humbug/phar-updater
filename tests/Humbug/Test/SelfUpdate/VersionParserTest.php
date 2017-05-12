@@ -147,7 +147,7 @@ class VersionParserTest extends TestCase
         $this->assertFalse($parser->isPreRelease('1.0.0'));
         $this->assertTrue($parser->isPreRelease('1.0.0b'));
         $this->assertFalse($parser->isPreRelease('1.0.0-dev'));
-        $this->assertTrue($parser->isPreRelease('1.0.0-alpha1-5-g5b46ad8'));
+        $this->assertFalse($parser->isPreRelease('1.0.0-alpha1-5-g5b46ad8'));
     }
 
     public function testIsUnstable()
@@ -165,7 +165,7 @@ class VersionParserTest extends TestCase
         $this->assertFalse($parser->isDevelopment('1.0.0'));
         $this->assertFalse($parser->isDevelopment('1.0.0b'));
         $this->assertTrue($parser->isDevelopment('1.0.0-dev'));
-        $this->assertFalse($parser->isDevelopment('1.0.0-alpha1-5-g5b46ad8'));
+        $this->assertTrue($parser->isDevelopment('1.0.0-alpha1-5-g5b46ad8'));
     }
 
     public function testEqualsWithSameSemverVersion()
