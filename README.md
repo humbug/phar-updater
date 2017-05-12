@@ -173,6 +173,16 @@ the version string used by Github. This can follow any standard practice with
 recognisable pre- and postfixes, e.g.
 `v1.0.3`, `1.0.3`, `1.1`, `1.3rc`, `1.3.2pl2`.
 
+Note: All version strings must follow [SemVer v2.0.0](http://semver.org/) to allow
+accurate comparison. The sole exception is that allowance is made for versions pre-
+or post-fixed with `dev` to mark development versions. Development versions are
+compared solely on the basis of the version string excluding the `dev` label. As
+a convenience, versions formatted using, for example, `git describe` (e.g.
+`1.0.0alpha.2-26-ge67g3d`) have a `-dev` postfix added (i.e. becoming
+`1.0.0alpha.2-dev`). If you frequently update across development versions, it is
+strongly recommended to use the SHA-1 or SHA-256 strategies, or implement a custom
+strategy that can compare versions based on such metadata.
+
 If you wish to update to a non-stable version, for example where users want to
 update according to a development track, you can set the stability flag for the
 Github strategy. By default this is set to `stable` or, in constant form,
