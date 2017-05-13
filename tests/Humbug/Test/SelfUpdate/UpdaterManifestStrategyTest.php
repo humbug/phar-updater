@@ -4,8 +4,9 @@ namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\ManifestStrategy;
+use PHPUnit\Framework\TestCase;
 
-class UpdaterManifestStrategyTest extends \PHPUnit_Framework_TestCase
+class UpdaterManifestStrategyTest extends TestCase
 {
 
     private $files;
@@ -64,7 +65,7 @@ class UpdaterManifestStrategyTest extends \PHPUnit_Framework_TestCase
         $updater->setBackupPath($this->tmp . '/backup.phar');
         $cwd = getcwd();
         chdir(__DIR__);
-        $updater->update();
+        $this->assertTrue($updater->update());
         chdir($cwd);
     }
 
