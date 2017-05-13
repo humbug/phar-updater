@@ -9,15 +9,29 @@ use PHPUnit\Framework\TestCase;
 class UpdaterManifestStrategyTest extends TestCase
 {
 
+    /**
+     * @var string
+     */
     private $files;
 
-    /** @var Updater */
+    /**
+     * @var Updater
+     */
     private $updater;
 
+    /**
+     * @var string
+     */
     private $manifestFile;
 
+    /**
+     * @var string
+     */
     private $tmp;
 
+    /**
+     * @inheritdoc
+     */
     public function setup()
     {
         $this->tmp = sys_get_temp_dir();
@@ -26,6 +40,15 @@ class UpdaterManifestStrategyTest extends TestCase
         $this->manifestFile = $this->files . '/manifest.json';
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function teardown()
+    {
+        @unlink($this->tmp . '/test.phar');
+        @unlink($this->tmp . '/backup.phar');
+    }
+    
     public function testGetLocalVersion()
     {
         $strategy = new ManifestStrategy('1.0.0', $this->manifestFile);
@@ -69,9 +92,4 @@ class UpdaterManifestStrategyTest extends TestCase
         chdir($cwd);
     }
 
-    public function teardown()
-    {
-        @unlink($this->tmp . '/test.phar');
-        @unlink($this->tmp . '/backup.phar');
-    }
 }

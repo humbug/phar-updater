@@ -1,26 +1,56 @@
 <?php
+/**
+ * Humbug
+ *
+ * @category   Humbug
+ * @package    Humbug
+ * @copyright  Copyright (c) 2017 Patrick Dawkins
+ * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
+ *
+ */
 namespace Humbug\SelfUpdate\Strategy;
 
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\JsonParsingException;
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\VersionParser;
+use Humbug\SelfUpdate\Exception\RuntimeException;
 
-class ManifestStrategy implements StrategyInterface
+final class ManifestStrategy implements StrategyInterface
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     private static $requiredKeys = array('sha1', 'version', 'url');
-    /** @var string */
+
+    /**
+     * @var string
+     */
     private $manifestUrl;
-    /** @var array */
+
+    /**
+     * @var array
+     */
     private $manifest;
-    /** @var array */
+
+    /**
+     * @var array
+     */
     private $availableVersions;
-    /** @var string */
+
+    /**
+     * @var string
+     */
     private $localVersion;
-    /** @var bool */
+
+    /**
+     * @var bool
+     */
     private $allowMajor = false;
-    /** @var bool */
+
+    /**
+     * @var bool
+     */
     private $allowUnstable = false;
 
     /**
@@ -59,11 +89,12 @@ class ManifestStrategy implements StrategyInterface
     {
         $version = $this->getCurrentRemoteVersion($updater);
         if ($version === false) {
-            throw new \RuntimeException('No remote versions found');
+            throw new RuntimeException('No remote versions found');
         }
+
         $versionInfo = $this->getAvailableVersions();
         if (!isset($versionInfo[$version])) {
-            throw new \RuntimeException(sprintf('Failed to find manifest item for version %s', $version));
+            throw new RuntimeException(sprintf('Failed to find manifest item for version %s', $version));
         }
 
         $fileContents = file_get_contents($versionInfo[$version]['url']);
@@ -73,13 +104,13 @@ class ManifestStrategy implements StrategyInterface
 
         $tmpFilename = $updater->getTempPharFile();
         if (file_put_contents($tmpFilename, $fileContents) === false) {
-            throw new \RuntimeException(sprintf('Failed to write file: %s', $tmpFilename));
+            throw new RuntimeException(sprintf('Failed to write file: %s', $tmpFilename));
         }
 
         $tmpSha = sha1_file($tmpFilename);
         if ($tmpSha !== $versionInfo[$version]['sha1']) {
             unlink($tmpFilename);
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     'SHA-1 verification failed: expected %s, actual %s',
                     $versionInfo[$version]['sha1'],
@@ -113,24 +144,24 @@ class ManifestStrategy implements StrategyInterface
     }
 
     /**
-     * Get available versions to update to.
+     * Gets available versions to update to.
      *
-     * @return array
-     *   An array keyed by the version name, whose elements are arrays
-     *   containing version information ('name', 'sha1', and 'url').
+     * @return array  An array keyed by the version name, whose elements are arrays
+     *                containing version information ('name', 'sha1', and 'url').
      */
     private function getAvailableVersions()
     {
-        if (!isset($this->availableVersions)) {
-            $this->availableVersions = array();
-            foreach ($this->getManifest() as $key => $item) {
-                if ($missing = array_diff(self::$requiredKeys, array_keys($item))) {
-                    throw new \RuntimeException(sprintf('Manifest item %s missing required key(s): %s', $key, implode(',', $missing)));
-                }
-                $this->availableVersions[$item['version']] = $item;
-            }
+        if (isset($this->availableVersions)) {
+            return $this->availableVersions;
         }
 
+        $this->availableVersions = array();
+        foreach ($this->retrieveManifest() as $key => $item) {
+            if ($missing = array_diff(self::$requiredKeys, array_keys($item))) {
+                throw new RuntimeException(sprintf('Manifest item %s missing required key(s): %s', $key, implode(',', $missing)));
+            }
+            $this->availableVersions[$item['version']] = $item;
+        }
         return $this->availableVersions;
     }
 
@@ -139,15 +170,19 @@ class ManifestStrategy implements StrategyInterface
      *
      * @return array
      */
-    private function getManifest()
+    private function retrieveManifest()
     {
+        if (isset($this->manifest)) {
+            return $this->manifest;
+        }
+
         if (!isset($this->manifest)) {
             $manifestContents = file_get_contents($this->manifestUrl);
             if ($manifestContents === false) {
-                throw new \RuntimeException(sprintf('Failed to download manifest: %s', $this->manifestUrl));
+                throw new RuntimeException(sprintf('Failed to download manifest: %s', $this->manifestUrl));
             }
 
-            $this->manifest = (array) json_decode($manifestContents, true);
+            $this->manifest = json_decode($manifestContents, true, null, JSON_OBJECT_AS_ARRAY);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new JsonParsingException(
                     'Error parsing manifest file'
@@ -169,10 +204,10 @@ class ManifestStrategy implements StrategyInterface
     private function filterByLocalMajorVersion(array $versions)
     {
         list($localMajorVersion, ) = explode('.', $this->localVersion, 2);
+
         return array_filter($versions, function ($version) use ($localMajorVersion) {
             list($majorVersion, ) = explode('.', $version, 2);
             return $majorVersion === $localMajorVersion;
         });
-
     }
 }
