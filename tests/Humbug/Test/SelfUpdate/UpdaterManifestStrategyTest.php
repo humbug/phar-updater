@@ -48,7 +48,7 @@ class UpdaterManifestStrategyTest extends TestCase
         @unlink($this->tmp . '/test.phar');
         @unlink($this->tmp . '/backup.phar');
     }
-    
+
     public function testGetLocalVersion()
     {
         $strategy = new ManifestStrategy('1.0.0', $this->manifestFile);
@@ -91,5 +91,4 @@ class UpdaterManifestStrategyTest extends TestCase
         $this->assertTrue($updater->update());
         chdir($cwd);
     }
-
 }

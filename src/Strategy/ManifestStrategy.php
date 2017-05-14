@@ -21,7 +21,7 @@ final class ManifestStrategy implements StrategyInterface
     /**
      * @var array
      */
-    private static $requiredKeys = array('sha1', 'version', 'url');
+    private static $requiredKeys = array('sha256', 'version', 'url');
 
     /**
      * @var string
@@ -54,12 +54,27 @@ final class ManifestStrategy implements StrategyInterface
     private $allowUnstable = false;
 
     /**
+     * @var int
+     */
+    private $manifestTimeout = 60;
+
+    /**
+     * @var int
+     */
+    private $downloadTimeout = 60;
+
+    /**
+     * @var bool
+     */
+    private $ignorePhpReq = false;
+
+    /**
      * ManifestStrategy constructor.
      *
      * @param string $localVersion  The local version.
      * @param string $manifestUrl   The URL to a JSON manifest file. The
      *                              manifest contains an array of objects, each
-     *                              containing a 'version', 'sha1', and 'url'.
+     *                              containing a 'version', 'sha256', and 'url'.
      * @param bool   $allowMajor    Whether to allow updating between major
      *                              versions.
      * @param bool   $allowUnstable Whether to allow updating to an unstable
@@ -72,6 +87,30 @@ final class ManifestStrategy implements StrategyInterface
         $this->manifestUrl = $manifestUrl;
         $this->allowMajor = $allowMajor;
         $this->allowUnstable = $allowUnstable;
+    }
+
+    /**
+     * @param int $downloadTimeout
+     */
+    public function setDownloadTimeout($downloadTimeout)
+    {
+        $this->downloadTimeout = $downloadTimeout;
+    }
+
+    /**
+     * @param int $manifestTimeout
+     */
+    public function setManifestTimeout($manifestTimeout)
+    {
+        $this->manifestTimeout = $manifestTimeout;
+    }
+
+    /**
+     * If set, ignores any restrictions based on currently running PHP version.
+     */
+    public function ignorePhpRequirements()
+    {
+        $this->ignorePhpReq = true;
     }
 
     /**
@@ -97,7 +136,8 @@ final class ManifestStrategy implements StrategyInterface
             throw new RuntimeException(sprintf('Failed to find manifest item for version %s', $version));
         }
 
-        $fileContents = file_get_contents($versionInfo[$version]['url']);
+        $context = stream_context_create(['http' => ['timeout' => $this->downloadTimeout]]);
+        $fileContents = file_get_contents($versionInfo[$version]['url'], false, $context);
         if ($fileContents === false) {
             throw new HttpRequestException(sprintf('Failed to download file from URL: %s', $versionInfo[$version]['url']));
         }
@@ -107,13 +147,13 @@ final class ManifestStrategy implements StrategyInterface
             throw new RuntimeException(sprintf('Failed to write file: %s', $tmpFilename));
         }
 
-        $tmpSha = sha1_file($tmpFilename);
-        if ($tmpSha !== $versionInfo[$version]['sha1']) {
+        $tmpSha = hash_file('sha256', $tmpFilename);
+        if ($tmpSha !== $versionInfo[$version]['sha256']) {
             unlink($tmpFilename);
             throw new RuntimeException(
                 sprintf(
-                    'SHA-1 verification failed: expected %s, actual %s',
-                    $versionInfo[$version]['sha1'],
+                    'SHA-256 verification failed: expected %s, actual %s',
+                    $versionInfo[$version]['sha256'],
                     $tmpSha
                 )
             );
@@ -123,11 +163,14 @@ final class ManifestStrategy implements StrategyInterface
     /**
      * {@inheritdoc}
      */
-    public function getCurrentRemoteVersion(Updater $updater)
+    public function getCurrentRemoteVersion(Updater $updater) //checked
     {
         $versions = array_keys($this->getAvailableVersions());
         if (!$this->allowMajor) {
             $versions = $this->filterByLocalMajorVersion($versions);
+        }
+        if (!$this->ignorePhpReq) {
+            $versions = $this->filterByPhpVersion($versions);
         }
 
         $versionParser = new VersionParser($versions);
@@ -136,7 +179,8 @@ final class ManifestStrategy implements StrategyInterface
 
         // Look for unstable updates if explicitly allowed, or if the local
         // version is already unstable and there is no new stable version.
-        if ($this->allowUnstable || ($versionParser->isUnstable($this->localVersion) && version_compare($mostRecent, $this->localVersion, '<'))) {
+        if ($this->allowUnstable || ($versionParser->isUnstable($this->localVersion)
+        && version_compare($mostRecent, $this->localVersion, '<'))) {
             $mostRecent = $versionParser->getMostRecentAll();
         }
 
@@ -144,12 +188,42 @@ final class ManifestStrategy implements StrategyInterface
     }
 
     /**
+     * Find update/upgrade notes for the new remote version.
+     *
+     * @param Updater $updater
+     *
+     * @return string|false A string if notes are found, or false otherwise.
+     */
+    public function getUpdateNotes(Updater $updater) //checked
+    {
+        $versionInfo = $this->getRemoteVersionInfo($updater);
+        if (empty($versionInfo['updating'])) {
+            return false;
+        }
+        $localVersion = $this->getCurrentLocalVersion($updater);
+        $items = isset($versionInfo['updating'][0]) ? $versionInfo['updating'] : [$versionInfo['updating']];
+        foreach ($items as $updating) {
+            if (!isset($updating['notes'])) {
+                continue;
+            } elseif (isset($updating['hide from']) && version_compare($localVersion, $updating['hide from'], '>=')) {
+                continue;
+            } elseif (isset($updating['show from']) && version_compare($localVersion, $updating['show from'], '<')) {
+                continue;
+            }
+
+            return $updating['notes'];
+        }
+
+        return false;
+    }
+
+    /**
      * Gets available versions to update to.
      *
      * @return array  An array keyed by the version name, whose elements are arrays
-     *                containing version information ('name', 'sha1', and 'url').
+     *                containing version information ('name', 'sha256', and 'url').
      */
-    private function getAvailableVersions()
+    private function getAvailableVersions() //checked
     {
         if (isset($this->availableVersions)) {
             return $this->availableVersions;
@@ -158,7 +232,13 @@ final class ManifestStrategy implements StrategyInterface
         $this->availableVersions = array();
         foreach ($this->retrieveManifest() as $key => $item) {
             if ($missing = array_diff(self::$requiredKeys, array_keys($item))) {
-                throw new RuntimeException(sprintf('Manifest item %s missing required key(s): %s', $key, implode(',', $missing)));
+                throw new RuntimeException(
+                    sprintf(
+                        'Manifest item %s missing required key(s): %s',
+                        $key,
+                        implode(',', $missing)
+                    )
+                );
             }
             $this->availableVersions[$item['version']] = $item;
         }
@@ -177,7 +257,8 @@ final class ManifestStrategy implements StrategyInterface
         }
 
         if (!isset($this->manifest)) {
-            $manifestContents = file_get_contents($this->manifestUrl);
+            $context = stream_context_create(['http' => ['timeout' => $this->manifestTimeout]]);
+            $manifestContents = file_get_contents($this->manifestUrl, false, $context);
             if ($manifestContents === false) {
                 throw new RuntimeException(sprintf('Failed to download manifest: %s', $this->manifestUrl));
             }
@@ -195,6 +276,26 @@ final class ManifestStrategy implements StrategyInterface
     }
 
     /**
+     * Get version information for the latest remote version.
+     *
+     * @param Updater $updater
+     *
+     * @return array
+     */
+    private function getRemoteVersionInfo(Updater $updater)
+    {
+        $version = $this->getCurrentRemoteVersion($updater);
+        if ($version === false) {
+            throw new RuntimeException('No remote versions found');
+        }
+        $versionInfo = $this->getAvailableVersions();
+        if (!isset($versionInfo[$version])) {
+            throw new RuntimeException(sprintf('Failed to find manifest item for version %s', $version));
+        }
+        return $versionInfo[$version];
+    }
+
+    /**
      * Filter a list of versions to those that match the current local version.
      *
      * @param string[] $versions
@@ -208,6 +309,28 @@ final class ManifestStrategy implements StrategyInterface
         return array_filter($versions, function ($version) use ($localMajorVersion) {
             list($majorVersion, ) = explode('.', $version, 2);
             return $majorVersion === $localMajorVersion;
+        });
+    }
+
+        /**
+     * Filter a list of versions to those that allow the current PHP version.
+     *
+     * @param string[] $versions
+     *
+     * @return string[]
+     */
+    private function filterByPhpVersion(array $versions)
+    {
+        $versionInfo = $this->getAvailableVersions();
+        return array_filter($versions, function ($version) use ($versionInfo) {
+            if (isset($versionInfo[$version]['php']['min'])
+                && version_compare(PHP_VERSION, $versionInfo[$version]['php']['min'], '<')) {
+                return false;
+            } elseif (isset($versionInfo[$version]['php']['max'])
+                && version_compare(PHP_VERSION, $versionInfo[$version]['php']['max'], '>')) {
+                return false;
+            }
+            return true;
         });
     }
 }
