@@ -268,14 +268,15 @@ $updater->getStrategy()->setCurrentLocalVersion('1.0.1');
 /**
  * 1) Allow updates outside of the current major version installed locally.
  * 2) Allow updates even if local PHP version is not within PHP requirements per manifest.
- * 3) Allow updates to an unstable version (e.g. beta).
+ * 3) Allow updates to an unstable version (e.g. beta). 'stable' and 'unstable' or
+      their corresponding constants are alternatives.
  * 4) If they exist, display update notes from manifest file to user.
  * 5) (Not recommended!) Use SHA-1 instead of SHA-256
  */
 $update->getStrategy()
     ->allowMajorVersionUpdates()
     ->ignorePhpRequirements()
-    ->allowUnstableVersionUpdates()
+    ->setStability('any')
     ->useSha1();
 
 try {

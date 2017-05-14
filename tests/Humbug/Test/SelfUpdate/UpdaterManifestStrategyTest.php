@@ -80,6 +80,15 @@ class UpdaterManifestStrategyTest extends TestCase
         $this->assertEquals('1.3.0-beta', $strategy->getCurrentRemoteVersion($this->updater));
     }
 
+    public function testSuggestNewestUnstableWhenRequired()
+    {
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
+        $strategy->setStability(ManifestStrategy::UNSTABLE);
+        $this->assertEquals('1.3.0-beta', $strategy->getCurrentRemoteVersion($this->updater));
+    }
+
     public function testSuggestNewestStableFromUnstable()
     {
         $strategy = new ManifestStrategy;

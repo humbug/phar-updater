@@ -22,6 +22,12 @@ final class ManifestStrategy implements StrategyInterface
 
     const SHA1 = 'sha1';
 
+    const STABLE = 'stable';
+
+    const UNSTABLE = 'unstable';
+
+    const ANY = 'any';
+
     /**
      * @var array
      */
@@ -61,6 +67,11 @@ final class ManifestStrategy implements StrategyInterface
      * @var bool
      */
     private $allowUnstable = false;
+
+    /**
+     * @var bool
+     */
+    private $requireUnstable = false;
 
     /**
      * @var int
@@ -132,6 +143,33 @@ final class ManifestStrategy implements StrategyInterface
     {
         $this->allowMajor = true;
         return $this;
+    }
+
+    /**
+     * Set target stability
+     *
+     * @param string $stability
+     */
+    public function setStability($stability)
+    {
+        if ($stability !== self::STABLE && $stability !== self::UNSTABLE && $stability !== self::ANY) {
+            throw new InvalidArgumentException(
+                'Invalid stability value. Must be one of "stable", "unstable"'
+            );
+        }
+        
+        switch ($stability) {
+            case self::ANY:
+                $this->allowUnstableVersionUpdates();
+                break;
+
+            case self::UNSTABLE:
+                $this->requireUnstable = true;
+                break;
+            
+            default:
+                break;
+        }
     }
 
     /**
@@ -221,7 +259,9 @@ final class ManifestStrategy implements StrategyInterface
 
         // Look for unstable updates if explicitly allowed, or if the local
         // version is already unstable and there is no new stable version.
-        if ($this->allowUnstable || ($versionParser->isUnstable($this->localVersion)
+        if (true === $this->requireUnstable) {
+            $mostRecent = $versionParser->getMostRecentUnstable();
+        } elseif ($this->allowUnstable || ($versionParser->isUnstable($this->localVersion)
         && version_compare($mostRecent, $this->localVersion, '<'))) {
             $mostRecent = $versionParser->getMostRecentAll();
         }
