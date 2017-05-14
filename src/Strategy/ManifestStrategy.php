@@ -76,6 +76,7 @@ final class ManifestStrategy implements StrategyInterface
     public function setCurrentLocalVersion($version)
     {
         $this->localVersion = $version;
+        return $this;
     }
 
     /**
@@ -131,6 +132,7 @@ final class ManifestStrategy implements StrategyInterface
     public function setManifestUrl($url)
     {
         $this->manifestUrl = $url;
+        return $this;
     }
 
     /**
@@ -187,7 +189,7 @@ final class ManifestStrategy implements StrategyInterface
     /**
      * {@inheritdoc}
      */
-    public function getCurrentRemoteVersion(Updater $updater) //checked
+    public function getCurrentRemoteVersion(Updater $updater)
     {
         $versions = array_keys($this->getAvailableVersions());
         if (!$this->allowMajor) {
@@ -218,7 +220,7 @@ final class ManifestStrategy implements StrategyInterface
      *
      * @return string|false A string if notes are found, or false otherwise.
      */
-    public function getUpdateNotes(Updater $updater) //checked
+    public function getUpdateNotes(Updater $updater, $useBaseNote = false)
     {
         $versionInfo = $this->getRemoteVersionInfo($updater);
         if (empty($versionInfo['updating'])) {
@@ -240,6 +242,10 @@ final class ManifestStrategy implements StrategyInterface
             return $updating['notes'];
         }
 
+        if (true === $useBaseNote && !empty($versionInfo['notes'])) {
+            return $versionInfo['notes'];
+        }
+
         return false;
     }
 
@@ -249,7 +255,7 @@ final class ManifestStrategy implements StrategyInterface
      * @return array  An array keyed by the version name, whose elements are arrays
      *                containing version information ('name', 'sha256', and 'url').
      */
-    private function getAvailableVersions() //checked
+    private function getAvailableVersions()
     {
         if (isset($this->availableVersions)) {
             return $this->availableVersions;

@@ -280,8 +280,11 @@ try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
     
-    /* Display update notes? */
-    $updateNotes = $update->getStrategy()->getUpdateNotes();
+    /**
+     * We pass in the Updater, i.e. can be used without actually
+     * updating, for example when checking for updates.
+     */
+    $updateNotes = $update->getStrategy()->getUpdateNotes($updater, true);
     if (false !== $updateNotes) {
         echo($updateNotes . "\n");
     }
@@ -501,10 +504,10 @@ and a note for anyone updating from `1.1.10` but not if updating from `1.1.12` o
       "min": "7.1",
       "max": "7.2"
     },
-    "notes": "This is a release note or changelog",
+    "notes": "This is a version note or changelog",
     "updating": [
       {
-        "notes": "Specific note to display for certain versions",
+        "notes": "Specific note (ignores earlier notes) to display for certain versions",
         "show from": "1.1.10",
         "hide from": "1.1.12"
       }
@@ -518,8 +521,8 @@ and a note for anyone updating from `1.1.10` but not if updating from `1.1.12` o
 ]
 ```
 
-Notes can be retrieved from the Manifest strategy object using the `getNotes()` and
-`getUpdateNotes()`method.
+Notes can be retrieved from the Manifest strategy object using the `getUpdateNotes()`
+method.
 The PHP constraints are applied, when defined in the manifest, and if you
 have not called the strategy object's `ignorePhpRequirements()` method to disable
 those restrictions.

@@ -90,6 +90,59 @@ class UpdaterManifestStrategyTest extends TestCase
         $this->assertEquals('1.3.0-beta', $strategy->getCurrentRemoteVersion($this->updater));
     }
 
+    public function testUpdatingToMajorVersions()
+    {
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
+        $strategy->allowMajorVersionUpdates();
+        $this->assertEquals('2.1.0', $strategy->getCurrentRemoteVersion($this->updater));
+    }
+
+    public function testRetrievingUpdateNotesWhereVersionConstraintNotMatchedButAllowBaseNoteReturn()
+    {
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('2.0.11');
+        $strategy->setManifestUrl($this->manifestFile);
+        $this->assertEquals('2.1.0', $strategy->getCurrentRemoteVersion($this->updater));
+
+        $this->assertSame(
+            'This is a note',
+            $strategy->getUpdateNotes($this->updater, true)
+        );
+    }
+
+    public function testRetrievingUpdateNotesSpecificToVersion()
+    {
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('2.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
+        $this->assertEquals('2.1.0', $strategy->getCurrentRemoteVersion($this->updater));
+
+        $this->assertSame(
+            'Specific note to display for certain versions',
+            $strategy->getUpdateNotes($this->updater)
+        );
+    }
+
+    public function testRetrievingUpdateNotesReturnsFalseOutsideOfScopedVers()
+    {
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.9.0');
+        $strategy->setManifestUrl($this->manifestFile);
+        $strategy->allowMajorVersionUpdates();
+        $this->assertEquals('2.1.0', $strategy->getCurrentRemoteVersion($this->updater));
+
+        $this->assertFalse($strategy->getUpdateNotes($this->updater));
+
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('2.0.10');
+        $strategy->setManifestUrl($this->manifestFile);
+        $this->assertEquals('2.1.0', $strategy->getCurrentRemoteVersion($this->updater));
+
+        $this->assertFalse($strategy->getUpdateNotes($this->updater));
+    }
+
     public function testUpdate()
     {
         copy($this->files . '/test.phar', $this->tmp . '/test.phar');

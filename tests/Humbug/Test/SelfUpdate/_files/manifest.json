@@ -2,7 +2,7 @@
   {
     "sha256": "",
     "url": "",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "php": {
       "min": "4.0",
       "max": "11.0"
@@ -11,8 +11,8 @@
     "updating": [
       {
         "notes": "Specific note to display for certain versions",
-        "show from": "1.8.0",
-        "hide from": "1.9.0"
+        "show from": "2.0.0",
+        "hide from": "2.0.10"
       }
     ]
   },
