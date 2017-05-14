@@ -18,7 +18,6 @@ use Humbug\SelfUpdate\Exception\RuntimeException;
 
 final class ManifestStrategy implements StrategyInterface
 {
-
     const SHA256 = 'sha256';
 
     const SHA1 = 'sha1';
