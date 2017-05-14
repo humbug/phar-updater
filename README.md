@@ -270,11 +270,13 @@ $updater->getStrategy()->setCurrentLocalVersion('1.0.1');
  * 2) Allow updates even if local PHP version is not within PHP requirements per manifest.
  * 3) Allow updates to an unstable version (e.g. beta).
  * 4) If they exist, display update notes from manifest file to user.
+ * 5) (Not recommended!) Use SHA-1 instead of SHA-256
  */
 $update->getStrategy()
     ->allowMajorVersionUpdates()
     ->ignorePhpRequirements()
-    ->allowUnstableVersionUpdates();
+    ->allowUnstableVersionUpdates()
+    ->useSha1();
 
 try {
     $result = $updater->update();
@@ -487,6 +489,8 @@ Manifest Strategy is a JSON file. Here's the simplest set of entries supported.
   }
 ]
 ```
+Your download URLs could easily be files hosted in a Github Release, with the
+manifest uploaded to a github.io site.
 
 You can include optional manifest metadata specifying a minimum PHP version,
 release notes, and version bounded notes (shown only to a range of versions
@@ -526,3 +530,8 @@ method.
 The PHP constraints are applied, when defined in the manifest, and if you
 have not called the strategy object's `ignorePhpRequirements()` method to disable
 those restrictions.
+
+SHA-256 with the `sha256` entry is strongly recommended. If you need to support
+SHA-1 file hashes, and cannot transition immediately, you may use SHA-1 using
+a `sha1` entry instead. You must then call the `useSha1()` method on the strategy
+object to enable SHA-1 support.

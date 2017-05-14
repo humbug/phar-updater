@@ -27,6 +27,11 @@ class UpdaterManifestStrategyTest extends TestCase
     /**
      * @var string
      */
+    private $manifestFileSha1;
+
+    /**
+     * @var string
+     */
     private $tmp;
 
     /**
@@ -38,6 +43,7 @@ class UpdaterManifestStrategyTest extends TestCase
         $this->files = __DIR__ . '/_files';
         $this->updater = new Updater($this->files . '/test.phar', false);
         $this->manifestFile = $this->files . '/manifest.json';
+        $this->manifestFileSha1 = $this->files . '/manifest.sha1.json';
     }
 
     /**
@@ -151,6 +157,22 @@ class UpdaterManifestStrategyTest extends TestCase
         $strategy = $updater->getStrategy();
         $strategy->setCurrentLocalVersion('1.0.0');
         $strategy->setManifestUrl($this->manifestFile);
+        $updater->setBackupPath($this->tmp . '/backup.phar');
+        $cwd = getcwd();
+        chdir(__DIR__);
+        $this->assertTrue($updater->update());
+        chdir($cwd);
+    }
+
+    public function testUpdateSha1()
+    {
+        copy($this->files . '/test.phar', $this->tmp . '/test.phar');
+        $updater = new Updater($this->tmp . '/test.phar', false);
+        $updater->setStrategy(Updater::STRATEGY_MANIFEST);
+        $strategy = $updater->getStrategy();
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFileSha1);
+        $strategy->useSha1();
         $updater->setBackupPath($this->tmp . '/backup.phar');
         $cwd = getcwd();
         chdir(__DIR__);

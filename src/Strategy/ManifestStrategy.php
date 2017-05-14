@@ -18,10 +18,20 @@ use Humbug\SelfUpdate\Exception\RuntimeException;
 
 final class ManifestStrategy implements StrategyInterface
 {
+
+    const SHA256 = 'sha256';
+
+    const SHA1 = 'sha1';
+
     /**
      * @var array
      */
-    private static $requiredKeys = array('sha256', 'version', 'url');
+    private $requiredKeys = array(self::SHA256, 'version', 'url');
+
+    /**
+     * @var string
+     */
+    private $hashAlgo = self::SHA256;
 
     /**
      * @var string
@@ -99,6 +109,12 @@ final class ManifestStrategy implements StrategyInterface
         return $this;
     }
 
+    public function useSha1()
+    {
+        $this->requiredKeys[0] = self::SHA1;
+        $this->hashAlgo = self::SHA1;
+    }
+
     /**
      * If set, ignores any restrictions based on currently running PHP version.
      * @return  self
@@ -173,13 +189,14 @@ final class ManifestStrategy implements StrategyInterface
             throw new RuntimeException(sprintf('Failed to write file: %s', $tmpFilename));
         }
 
-        $tmpSha = hash_file('sha256', $tmpFilename);
-        if ($tmpSha !== $versionInfo[$version]['sha256']) {
+        $tmpSha = hash_file($this->hashAlgo, $tmpFilename);
+        if ($tmpSha !== $versionInfo[$version][$this->hashAlgo]) {
             unlink($tmpFilename);
             throw new RuntimeException(
                 sprintf(
-                    'SHA-256 verification failed: expected %s, actual %s',
-                    $versionInfo[$version]['sha256'],
+                    '%s verification failed: expected %s, actual %s',
+                    strtoupper($this->hashAlgo),
+                    $versionInfo[$version][$this->hashAlgo],
                     $tmpSha
                 )
             );
@@ -217,7 +234,7 @@ final class ManifestStrategy implements StrategyInterface
      * Find update/upgrade notes for the new remote version.
      *
      * @param Updater $updater
-     * @param bool $useBaseNote Return if no version specific update notes found.
+     * @param bool $useBaseNote Return main note if no version specific update notes found.
      *
      * @return string|false A string if notes are found, or false otherwise.
      */
@@ -254,7 +271,7 @@ final class ManifestStrategy implements StrategyInterface
      * Gets available versions to update to.
      *
      * @return array  An array keyed by the version name, whose elements are arrays
-     *                containing version information ('name', 'sha256', and 'url').
+     *                containing version information ('name', $this->hashAlgo, and 'url').
      */
     private function getAvailableVersions()
     {
@@ -264,7 +281,7 @@ final class ManifestStrategy implements StrategyInterface
 
         $this->availableVersions = array();
         foreach ($this->retrieveManifest() as $key => $item) {
-            if ($missing = array_diff(self::$requiredKeys, array_keys($item))) {
+            if ($missing = array_diff($this->requiredKeys, array_keys($item))) {
                 throw new RuntimeException(
                     sprintf(
                         'Manifest item %s missing required key(s): %s',
