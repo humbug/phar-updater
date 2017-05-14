@@ -23,6 +23,7 @@ minions (all ten of them) have written one for you.
 - [Update Strategies](#update-strategies)
     - [SHA-1 Hash Synchronisation](sha-1-hash-synchronisation)
     - [Github Releases](#github-releases)
+    - [Manifest Files](#manifest-files)
 
 Introduction
 ============
@@ -322,7 +323,7 @@ $updater->setStrategyObject(new MyStrategy);
 ```
 
 The similar `setStrategy()` method is solely used to pass flags matching internal
-strategies.
+strategies, e.g. `\Humbug\SelfUpdater\Updater::STRATEGY_MANIFEST`.
 
 Update Strategies
 =================
@@ -330,7 +331,7 @@ Update Strategies
 SHA-1 Hash Synchronisation
 --------------------------
 
-The phar-updater package only (that will change!) supports an update strategy
+The phar-updater package only supports an update strategy
 where phars are updated according to the SHA-1 hash of the current phar file
 available remotely. This assumes the existence of only two to three remote files:
 
@@ -390,3 +391,62 @@ you create a new git tag. If you use git tagging, you can go to the matching
 release on Github, click the `Edit` button and attach files. It's recommended to
 do this as soon as possible after tagging to limit the window whereby a new
 release exists without an updated phar attached.
+
+Manifest Files
+--------------
+
+A manifest is basically a list of versions available from a remote endpoint,
+optionally containing additional metadata. The format supporting by the built-in
+Manifest Strategy is a JSON file similar to:
+
+```js
+[
+  {
+    "sha256": "edb9a27795c1ec15e5c23d6cda1cc0ed0242b296f27ed0f39ae7eb4784a93744",
+    "url": "http://www.example.com/1.2.0/scrabble.phar",
+    "version": "1.2.0"
+  },
+  {
+    "sha256": "054e0cead9afd277865537ccb29586e546b2ccc5fc9d5ddfc401ee0ec36b1808",
+    "url": "http://www.example.com/1.1.0/scrabble.phar",
+    "version": "1.1.0"
+  }
+]
+```
+
+You can include optional manifest metadata specifying a minimum PHP version,
+release notes, and version bounded notes (shown only to a range of versions
+being updated from). Here's add optional metadata when updating to `1.2.0`
+include a minimum PHP vesion supported (a maximum is also possible), a release note,
+and a note for anyone updating from `1.1.10` but not if updating from `1.1.12` or later.
+
+```js
+[
+  {
+    "sha256": "edb9a27795c1ec15e5c23d6cda1cc0ed0242b296f27ed0f39ae7eb4784a93744",
+    "url": "http://www.example.com/1.2.0/scrabble.phar",
+    "version": "1.2.0"
+    "php": {
+      "min": "7.1",
+      "max": "7.2"
+    },
+    "notes": "This is a release note or changelog",
+    "updating": [
+      {
+        "notes": "Specific note to display for certain versions",
+        "show from": "1.1.10",
+        "hide from": "1.1.12"
+      }
+    ]
+  },
+  {
+    "sha256": "054e0cead9afd277865537ccb29586e546b2ccc5fc9d5ddfc401ee0ec36b1808",
+    "url": "http://www.example.com/1.1.0/scrabble.phar",
+    "version": "1.1.0"
+  }
+]
+```
+
+Notes can be retrieved from the Manifest strategy object using the `getUpdateNotes()`
+method. The PHP constraints are applied, when defined in the manifest, and if you
+have not called the strategy object's `ignorePhpRequirements()` method.

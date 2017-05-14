@@ -94,10 +94,10 @@ class UpdaterManifestStrategyTest extends TestCase
     {
         copy($this->files . '/test.phar', $this->tmp . '/test.phar');
         $updater = new Updater($this->tmp . '/test.phar', false);
-        $strategy = new ManifestStrategy;
+        $updater->setStrategy(Updater::STRATEGY_MANIFEST);
+        $strategy = $updater->getStrategy();
         $strategy->setCurrentLocalVersion('1.0.0');
         $strategy->setManifestUrl($this->manifestFile);
-        $updater->setStrategyObject($strategy);
         $updater->setBackupPath($this->tmp . '/backup.phar');
         $cwd = getcwd();
         chdir(__DIR__);
