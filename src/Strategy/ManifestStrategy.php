@@ -217,6 +217,7 @@ final class ManifestStrategy implements StrategyInterface
      * Find update/upgrade notes for the new remote version.
      *
      * @param Updater $updater
+     * @param bool $useBaseNote Return if no version specific update notes found.
      *
      * @return string|false A string if notes are found, or false otherwise.
      */

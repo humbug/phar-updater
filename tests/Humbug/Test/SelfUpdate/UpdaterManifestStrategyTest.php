@@ -157,4 +157,19 @@ class UpdaterManifestStrategyTest extends TestCase
         $this->assertTrue($updater->update());
         chdir($cwd);
     }
+
+    public function testHasUpdateAndGetNewVersion()
+    {
+        copy($this->files . '/test.phar', $this->tmp . '/test.phar');
+        $updater = new Updater($this->tmp . '/test.phar', false);
+        $updater->setStrategy(Updater::STRATEGY_MANIFEST);
+        $strategy = $updater->getStrategy();
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
+        $cwd = getcwd();
+        chdir(__DIR__);
+        $this->assertTrue($updater->hasUpdate());
+        $this->assertEquals('1.2.0', $updater->getNewVersion());
+        chdir($cwd);
+    }
 }
