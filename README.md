@@ -255,7 +255,7 @@ try {
 
 The Manifest Strategy is more flexible than most strategies since you can define
 more relevant metadata. For example, here's an extended example which shows a
-fuller range of update controls and information for users.
+fuller range of optional update controls and information for users.
 
 ```php
 use Humbug\SelfUpdate\Updater;
@@ -269,7 +269,7 @@ $updater->getStrategy()->setCurrentLocalVersion('1.0.1');
  * 1) Allow updates outside of the current major version installed locally.
  * 2) Allow updates even if local PHP version is not within PHP requirements per manifest.
  * 3) Allow updates to an unstable version (e.g. beta). 'stable' and 'unstable' or
-      their corresponding constants are alternatives.
+ *    their corresponding constants are alternatives.
  * 4) If they exist, display update notes from manifest file to user.
  * 5) (Not recommended!) Use SHA-1 instead of SHA-256
  */
