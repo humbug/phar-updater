@@ -13,10 +13,11 @@ minions (all ten of them) have written one for you.
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
+    - [Constructor Parameters](#constructor-parameters)
     - [Basic SHA-1 Strategy](#basic-sha-1-strategy)
     - [Github Release Strategy](#github-release-strategy)
+    - [Manifest Strategy](#manifest-strategy)
     - [Rollback Support](#rollback-support)
-    - [Constructor Parameters](#constructor-parameters)
     - [Check For Updates](#check-for-updates)
     - [Avoid Post Update File Includes](#avoid-post-update-file-includes)
     - [Custom Update Strategies](#custom-update-strategies)
@@ -50,6 +51,7 @@ The package utilises PHP Streams for remote requests so it will require the open
 extension and the `allow_url_open` setting to both be enabled. Support for curl
 will follow in time.
 
+
 Usage
 =====
 
@@ -57,6 +59,41 @@ The default update strategy uses an SHA-1 hash of the current remote phar in a
 version file, and will update the local phar when this version is changed. There
 is also a Github strategy which tracks Github Releases where you can upload a
 new phar file for a release.
+
+Please bear in mind the constructor parameters which primarily determine what
+strategy to use, and whether PHARs are signed.
+
+### Constructor Parameters
+
+The Updater constructor is fairly simple. The three basic variations are:
+
+```php
+/**
+ * Default: Update currently running phar which has been signed.
+ */
+$updater = new Updater;
+```
+
+```php
+/**
+ * Update currently running phar which has NOT been signed.
+ */
+$updater = new Updater(null, false);
+```
+
+```php
+/**
+ * Use a strategy other than the default SHA Hash.
+ */
+$updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
+```
+
+```php
+/**
+ * Update a different phar which has NOT been signed.
+ */
+$updater = new Updater('/path/to/impersonatephil.phar', false);
+```
 
 ### Basic SHA-1 Strategy
 
@@ -155,7 +192,7 @@ $updater = new Updater();
 $updater->setStrategy(Updater::STRATEGY_GITHUB);
 $updater->getStrategy()->setPackageName('myvendor/myapp');
 $updater->getStrategy()->setPharName('myapp.phar');
-$updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
+$updater->getStrategy()->setCurrentLocalVersion('1.0.1');
 try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
@@ -189,6 +226,71 @@ If you want to ignore stability and just update to the most recent version regar
 $updater->getStrategy()->setStability('any');
 ```
 
+### Manifest Strategy
+
+The Manifest Strategy uses a manifest file stored remotely to determine available
+versions and download URLs. Signed files are currently not supported. You can
+read an overview of the manifest file format here: [Manifest Files](#manifest-files).
+
+```php
+/**
+ * Other than somewhat different setters for the strategy, all other operations
+ * are identical.
+ */
+
+use Humbug\SelfUpdate\Updater;
+
+$updater = new Updater(null, false);
+$updater->setStrategy(Updater::STRATEGY_MANIFEST);
+$updater->getStrategy()->setManifestUrl('http://www.example.com/manifest.json');
+$updater->getStrategy()->setCurrentLocalVersion('1.0.1');
+try {
+    $result = $updater->update();
+    echo $result ? "Updated!\n" : "No update needed!\n";
+} catch (\Exception $e) {
+    echo 'Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
+}
+```
+
+The Manifest Strategy is more flexible than most strategies since you can define
+more relevant metadata. For example, here's an extended example which shows a
+fuller range of update controls and information for users.
+
+```php
+use Humbug\SelfUpdate\Updater;
+
+$updater = new Updater(null, false);
+$updater->setStrategy(Updater::STRATEGY_MANIFEST);
+$updater->getStrategy()->setManifestUrl('http://www.example.com/manifest.json');
+$updater->getStrategy()->setCurrentLocalVersion('1.0.1');
+
+/**
+ * 1) Allow updates outside of the current major version installed locally.
+ * 2) Allow updates even if local PHP version is not within PHP requirements per manifest.
+ * 3) Allow updates to an unstable version (e.g. beta).
+ * 4) If they exist, display update notes from manifest file to user.
+ */
+$update->getStrategy()
+    ->allowMajorVersionUpdates()
+    ->ignorePhpRequirements()
+    ->allowUnstableVersionUpdates();
+
+try {
+    $result = $updater->update();
+    echo $result ? "Updated!\n" : "No update needed!\n";
+    
+    /* Display update notes? */
+    $updateNotes = $update->getStrategy()->getUpdateNotes();
+    if (false !== $updateNotes) {
+        echo($updateNotes . "\n");
+    }
+} catch (\Exception $e) {
+    echo 'Well, something happened! Either an oopsie or something involving hackers.\n";
+    exit(1);
+}
+```
+
 ### Rollback Support
 
 The Updater automatically copies a backup of the original phar to myname-old.phar.
@@ -220,37 +322,6 @@ from using the `setBackupPath()` function when updating a current phar or the
 `setRestorePath()` prior to triggering a rollback. These will be used instead
 of the simple built in convention.
 
-### Constructor Parameters
-
-The Updater constructor is fairly simple. The three basic variations are:
-
-```php
-/**
- * Default: Update currently running phar which has been signed.
- */
-$updater = new Updater;
-```
-
-```php
-/**
- * Update currently running phar which has NOT been signed.
- */
-$updater = new Updater(null, false);
-```
-
-```php
-/**
- * Use a strategy other than the default SHA Hash.
- */
-$updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
-```
-
-```php
-/**
- * Update a different phar which has NOT been signed.
- */
-$updater = new Updater('/path/to/impersonatephil.phar', false);
-```
 
 ### Check For Updates
 
@@ -396,8 +467,8 @@ Manifest Files
 --------------
 
 A manifest is basically a list of versions available from a remote endpoint,
-optionally containing additional metadata. The format supporting by the built-in
-Manifest Strategy is a JSON file similar to:
+optionally containing additional metadata. The format supported by the built-in
+Manifest Strategy is a JSON file. Here's the simplest set of entries supported.
 
 ```js
 [
@@ -447,6 +518,8 @@ and a note for anyone updating from `1.1.10` but not if updating from `1.1.12` o
 ]
 ```
 
-Notes can be retrieved from the Manifest strategy object using the `getUpdateNotes()`
-method. The PHP constraints are applied, when defined in the manifest, and if you
-have not called the strategy object's `ignorePhpRequirements()` method.
+Notes can be retrieved from the Manifest strategy object using the `getNotes()` and
+`getUpdateNotes()`method.
+The PHP constraints are applied, when defined in the manifest, and if you
+have not called the strategy object's `ignorePhpRequirements()` method to disable
+those restrictions.
