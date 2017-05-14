@@ -69,48 +69,68 @@ final class ManifestStrategy implements StrategyInterface
     private $ignorePhpReq = false;
 
     /**
-     * ManifestStrategy constructor.
+     * Set version string of the local phar
      *
-     * @param string $localVersion  The local version.
-     * @param string $manifestUrl   The URL to a JSON manifest file. The
-     *                              manifest contains an array of objects, each
-     *                              containing a 'version', 'sha256', and 'url'.
-     * @param bool   $allowMajor    Whether to allow updating between major
-     *                              versions.
-     * @param bool   $allowUnstable Whether to allow updating to an unstable
-     *                              version. Ignored if $localVersion is unstable
-     *                              and there are no new stable versions.
+     * @param string $version
      */
-    public function __construct($localVersion, $manifestUrl, $allowMajor = false, $allowUnstable = false)
+    public function setCurrentLocalVersion($version)
     {
-        $this->localVersion = $localVersion;
-        $this->manifestUrl = $manifestUrl;
-        $this->allowMajor = $allowMajor;
-        $this->allowUnstable = $allowUnstable;
+        $this->localVersion = $version;
     }
 
     /**
      * @param int $downloadTimeout
+     * @return  self
      */
     public function setDownloadTimeout($downloadTimeout)
     {
         $this->downloadTimeout = $downloadTimeout;
+        return $this;
     }
 
     /**
      * @param int $manifestTimeout
+     * @return  self
      */
     public function setManifestTimeout($manifestTimeout)
     {
         $this->manifestTimeout = $manifestTimeout;
+        return $this;
     }
 
     /**
      * If set, ignores any restrictions based on currently running PHP version.
+     * @return  self
      */
     public function ignorePhpRequirements()
     {
         $this->ignorePhpReq = true;
+        return $this;
+    }
+
+    /**
+     * If set, ignores any restrictions based on currently running PHP version.
+     * @return  self
+     */
+    public function allowMajorVersionUpdates()
+    {
+        $this->allowMajor = true;
+        return $this;
+    }
+
+    /**
+     * If set, ignores any restrictions based on currently running PHP version.
+     * @return  self
+     */
+    public function allowUnstableVersionUpdates()
+    {
+        $this->allowUnstable = true;
+        return $this;
+    }
+
+    public function setManifestUrl($url)
+    {
+        $this->manifestUrl = $url;
     }
 
     /**
@@ -137,7 +157,11 @@ final class ManifestStrategy implements StrategyInterface
         }
 
         $context = stream_context_create(['http' => ['timeout' => $this->downloadTimeout]]);
+        /** Switch remote request errors to HttpRequestExceptions */
+        set_error_handler(array($updater, 'throwHttpRequestException'));
         $fileContents = file_get_contents($versionInfo[$version]['url'], false, $context);
+        restore_error_handler();
+
         if ($fileContents === false) {
             throw new HttpRequestException(sprintf('Failed to download file from URL: %s', $versionInfo[$version]['url']));
         }
@@ -205,9 +229,11 @@ final class ManifestStrategy implements StrategyInterface
         foreach ($items as $updating) {
             if (!isset($updating['notes'])) {
                 continue;
-            } elseif (isset($updating['hide from']) && version_compare($localVersion, $updating['hide from'], '>=')) {
+            } elseif (isset($updating['hide from'])
+            && version_compare($localVersion, $updating['hide from'], '>=')) {
                 continue;
-            } elseif (isset($updating['show from']) && version_compare($localVersion, $updating['show from'], '<')) {
+            } elseif (isset($updating['show from'])
+            && version_compare($localVersion, $updating['show from'], '<')) {
                 continue;
             }
 

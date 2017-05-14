@@ -51,31 +51,42 @@ class UpdaterManifestStrategyTest extends TestCase
 
     public function testGetLocalVersion()
     {
-        $strategy = new ManifestStrategy('1.0.0', $this->manifestFile);
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
         $this->assertEquals('1.0.0', $strategy->getCurrentLocalVersion($this->updater));
     }
 
     public function testSuggestMostRecentStable()
     {
-        $strategy = new ManifestStrategy('1.0.0', $this->manifestFile);
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
         $this->assertEquals('1.2.0', $strategy->getCurrentRemoteVersion($this->updater));
     }
 
     public function testSuggestNewestUnstable()
     {
-        $strategy = new ManifestStrategy('1.0.0', $this->manifestFile, false, true);
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
+        $strategy->allowUnstableVersionUpdates();
         $this->assertEquals('1.3.0-beta', $strategy->getCurrentRemoteVersion($this->updater));
     }
 
     public function testSuggestNewestStableFromUnstable()
     {
-        $strategy = new ManifestStrategy('1.0.0-beta', $this->manifestFile);
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0-beta');
+        $strategy->setManifestUrl($this->manifestFile);
         $this->assertEquals('1.2.0', $strategy->getCurrentRemoteVersion($this->updater));
     }
 
     public function testSuggestNewestUnstableFromUnstable()
     {
-        $strategy = new ManifestStrategy('1.2.9-beta', $this->manifestFile);
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.2.9-beta');
+        $strategy->setManifestUrl($this->manifestFile);
         $this->assertEquals('1.3.0-beta', $strategy->getCurrentRemoteVersion($this->updater));
     }
 
@@ -83,7 +94,9 @@ class UpdaterManifestStrategyTest extends TestCase
     {
         copy($this->files . '/test.phar', $this->tmp . '/test.phar');
         $updater = new Updater($this->tmp . '/test.phar', false);
-        $strategy = new ManifestStrategy('1.0.0', $this->manifestFile);
+        $strategy = new ManifestStrategy;
+        $strategy->setCurrentLocalVersion('1.0.0');
+        $strategy->setManifestUrl($this->manifestFile);
         $updater->setStrategyObject($strategy);
         $updater->setBackupPath($this->tmp . '/backup.phar');
         $cwd = getcwd();

@@ -76,7 +76,12 @@ class GithubStrategy implements StrategyInterface
             ));
         }
 
-        file_put_contents($updater->getTempPharFile(), $result);
+        $result = file_put_contents($updater->getTempPharFile(), $result);
+        if (false === $result) {
+            throw new RuntimeException(
+                sprintf('Failed to write file: %s', $updater->getTempPharFile())
+            );
+        }
     }
 
     /**
