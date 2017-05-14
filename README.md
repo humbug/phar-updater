@@ -188,6 +188,14 @@ If you want to ignore stability and just update to the most recent version regar
 $updater->getStrategy()->setStability('any');
 ```
 
+You can prevent updates to the next significant major version (e.g. 1.x to 2.x),
+for example, if you want the user to specifically agree to it or you have specific
+pre-conditions before doing so, using:
+
+```php
+$updater->getStrategy()->blockMajorVersionUpdates();
+```
+
 ### Rollback Support
 
 The Updater automatically copies a backup of the original phar to myname-old.phar.
