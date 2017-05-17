@@ -137,9 +137,19 @@ class Updater
         || (!is_bool($this->newVersionAvailable) && !$this->hasUpdate())) {
             return false;
         }
+        
         $this->backupPhar();
-        $this->downloadPhar();
+
+        try {
+            $this->downloadPhar();
+        } catch (\Exception $e) {
+            restore_error_handler();
+            $this->cleanupAfterError();
+            throw $e;
+        }
+
         $this->replacePhar();
+
         return true;
     }
 
@@ -375,13 +385,7 @@ class Updater
             }
         }
 
-        try {
-            $this->validatePhar($this->getTempPharFile());
-        } catch (\Exception $e) {
-            restore_error_handler();
-            $this->cleanupAfterError();
-            throw $e;
-        }
+        $this->validatePhar($this->getTempPharFile());
     }
 
     protected function replacePhar()
@@ -498,7 +502,7 @@ class Updater
 
     protected function cleanupAfterError()
     {
-        //@unlink($this->getBackupPharFile());
+        @unlink($this->getBackupPharFile());
         @unlink($this->getTempPharFile());
         @unlink($this->getTempPubKeyFile());
     }
