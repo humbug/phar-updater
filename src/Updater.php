@@ -143,7 +143,6 @@ class Updater
         try {
             $this->downloadPhar();
         } catch (\Exception $e) {
-            restore_error_handler();
             $this->cleanupAfterError();
             throw $e;
         }
