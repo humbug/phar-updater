@@ -375,7 +375,6 @@ class Updater
                 $algo = 'SHA-256';
             }
             if ($tmpVersion !== $this->getNewVersion()) {
-                $this->cleanupAfterError();
                 throw new HttpRequestException(sprintf(
                     'Download file appears to be corrupted or outdated. The file '
                         . 'received does not have the expected %s hash: %s.',
