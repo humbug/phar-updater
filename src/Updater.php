@@ -137,7 +137,7 @@ class Updater
         || (!is_bool($this->newVersionAvailable) && !$this->hasUpdate())) {
             return false;
         }
-        
+
         $this->backupPhar();
 
         try {
