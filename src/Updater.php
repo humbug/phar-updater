@@ -386,33 +386,18 @@ class Updater
 
     protected function downloadPhar()
     {
-        $this->strategy->download($this);
+        try {
+            $this->strategy->download($this);
+        } catch (\Exception $e) {
+            restore_error_handler();
+            $this->cleanupAfterError();
+            throw $e; 
+        }
 
         if (!file_exists($this->getTempPharFile())) {
             throw new FilesystemException(
                 'Creation of download file failed.'
             );
-        }
-
-        if ($this->getStrategy() instanceof ShaStrategy
-            || $this->getStrategy() instanceof Sha256Strategy
-        ) {
-            if ($this->getStrategy() instanceof ShaStrategy) {
-                $tmpVersion = sha1_file($this->getTempPharFile());
-                $algo = 'SHA-1';
-            } else {
-                $tmpVersion = hash_file('sha256', $this->getTempPharFile());
-                $algo = 'SHA-256';
-            }
-            if ($tmpVersion !== $this->getNewVersion()) {
-                $this->cleanupAfterError();
-                throw new HttpRequestException(sprintf(
-                    'Download file appears to be corrupted or outdated. The file '
-                        . 'received does not have the expected %s hash: %s.',
-                    $algo,
-                    $this->getNewVersion()
-                ));
-            }
         }
 
         try {

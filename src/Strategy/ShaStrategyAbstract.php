@@ -55,6 +55,26 @@ abstract class ShaStrategyAbstract implements StrategyInterface
         }
 
         file_put_contents($updater->getTempPharFile(), $result);
+
+        if ($this instanceof ShaStrategy
+            || $this instanceof Sha256Strategy
+        ) {
+            if ($this instanceof ShaStrategy) {
+                $tmpVersion = sha1_file($updater->getTempPharFile());
+                $algo = 'SHA-1';
+            } else {
+                $tmpVersion = hash_file('sha256', $updater->getTempPharFile());
+                $algo = 'SHA-256';
+            }
+            if ($tmpVersion !== $updater->getNewVersion()) {
+                throw new HttpRequestException(sprintf(
+                    'Download file appears to be corrupted or outdated. The file '
+                        . 'received does not have the expected %s hash: %s.',
+                    $algo,
+                    $updater->getNewVersion()
+                ));
+            }
+        }
     }
 
     /**
