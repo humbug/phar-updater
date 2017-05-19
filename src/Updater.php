@@ -485,13 +485,13 @@ class Updater
         /** Switch invalid key errors to RuntimeExceptions */
         set_error_handler(array($this, 'throwRuntimeException'));
         $phar = new \Phar($phar);
+        restore_error_handler();
         $signature = $phar->getSignature();
         if ($this->hasPubKey() && strtolower($signature['hash_type']) !== 'openssl') {
             throw new NoSignatureException(
                 'The downloaded phar file has no OpenSSL signature.'
             );
         }
-        restore_error_handler();
         if ($this->hasPubKey()) {
             @unlink($phar . '.pubkey');
         }
@@ -500,6 +500,7 @@ class Updater
 
     protected function cleanupAfterError()
     {
+        restore_error_handler();
         @unlink($this->getBackupPharFile());
         @unlink($this->getTempPharFile());
         @unlink($this->getTempPubKeyFile());
