@@ -46,7 +46,7 @@ abstract class ShaStrategyAbstract implements StrategyInterface
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $result = humbug_get_contents($this->getPharUrl());
+        $result = file_get_contents($this->getPharUrl());
         restore_error_handler();
         if (false === $result) {
             throw new HttpRequestException(sprintf(

@@ -32,7 +32,7 @@ class ShaStrategy extends ShaStrategyAbstract
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $version = humbug_get_contents($this->getVersionUrl());
+        $version = file_get_contents($this->getVersionUrl());
         restore_error_handler();
         if (false === $version) {
             throw new HttpRequestException(sprintf(

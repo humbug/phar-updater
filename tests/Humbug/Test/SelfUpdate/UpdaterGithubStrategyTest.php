@@ -22,6 +22,9 @@ class UpdaterGithubStrategyTest extends TestCase
     /** @var Updater */
     private $updater;
 
+    /** @var GithubStrategy */
+    private $strategy;
+
     private $tmp;
 
     private $data;
@@ -30,7 +33,9 @@ class UpdaterGithubStrategyTest extends TestCase
     {
         $this->tmp = sys_get_temp_dir();
         $this->files = __DIR__ . '/_files';
-        $this->updater = new Updater($this->files . '/test.phar', false, Updater::STRATEGY_GITHUB);
+
+        $this->strategy = new GithubStrategy;
+        $this->updater = new Updater($this->strategy, false, $this->files . '/test.phar');
     }
 
     public function tearDown()
@@ -40,7 +45,7 @@ class UpdaterGithubStrategyTest extends TestCase
 
     public function testConstruction()
     {
-        $updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
+        $updater = new Updater($this->strategy, false);
         $this->assertTrue(
             $updater->getStrategy() instanceof GithubStrategy
         );
@@ -106,8 +111,7 @@ class UpdaterGithubStrategyTest extends TestCase
         $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
-        $updater = new Updater($this->tmp . '/old.phar');
-        $updater->setStrategyObject(new GithubTestStrategy);
+        $updater = new Updater(new GithubTestStrategy, true, $this->tmp . '/old.phar');
         $updater->getStrategy()->setPharName('new.phar');
         $updater->getStrategy()->setPackageName(''); // not used in this test
         $updater->getStrategy()->setCurrentLocalVersion('1.0.0');

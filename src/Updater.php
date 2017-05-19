@@ -93,11 +93,11 @@ class Updater
     /**
      * Constructor
      *
-     * @param string $localPharFile
-     * @param bool $hasPubKey
      * @param string $strategy
+     * @param bool $hasPubKey
+     * @param string $localPharFile
      */
-    public function __construct($localPharFile = null, $hasPubKey = true, $strategy = self::STRATEGY_SHA1)
+    public function __construct(StrategyInterface $strategy, $hasPubKey = false, $localPharFile = null)
     {
         ini_set('phar.require_hash', 1);
         $this->setLocalPharFile($localPharFile);
@@ -112,7 +112,7 @@ class Updater
             $this->setLocalPubKeyFile();
         }
         $this->setTempDirectory();
-        $this->setStrategy($strategy);
+        $this->setStrategyObject($strategy);
     }
 
     /**
@@ -176,11 +176,17 @@ class Updater
         }
     }
 
+    /**
+     * @param StrategyInterface $strategy
+     */
     public function setStrategyObject(StrategyInterface $strategy)
     {
         $this->strategy = $strategy;
     }
 
+    /**
+     * @return StrategyInterface
+     */
     public function getStrategy()
     {
         return $this->strategy;
@@ -206,26 +212,41 @@ class Updater
         return $this->backupExtension;
     }
 
+    /**
+     * @return string
+     */
     public function getLocalPharFile()
     {
         return $this->localPharFile;
     }
 
+    /**
+     * @return string
+     */
     public function getLocalPharFileBasename()
     {
         return $this->localPharFileBasename;
     }
 
+    /**
+     * @return string
+     */
     public function getLocalPubKeyFile()
     {
         return $this->localPubKeyFile;
     }
 
+    /**
+     * @return string
+     */
     public function getTempDirectory()
     {
         return $this->tempDirectory;
     }
 
+    /**
+     * @return string
+     */
     public function getTempPharFile()
     {
         return $this->getTempDirectory()
@@ -233,11 +254,17 @@ class Updater
             . sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
     }
 
+    /**
+     * @return string
+     */
     public function getNewVersion()
     {
         return $this->newVersion;
     }
 
+    /**
+     * @return string
+     */
     public function getOldVersion()
     {
         return $this->oldVersion;
@@ -305,16 +332,29 @@ class Updater
         return $this->restorePath;
     }
 
+    /**
+     * @param  int    $errno
+     * @param  string $errstr
+     * @throws RuntimeException
+     */
     public function throwRuntimeException($errno, $errstr)
     {
         throw new RuntimeException($errstr);
     }
 
+    /**
+     * @param  int    $errno
+     * @param  string $errstr
+     * @throws HttpRequestException
+     */
     public function throwHttpRequestException($errno, $errstr)
     {
         throw new HttpRequestException($errstr);
     }
 
+    /**
+     * @return boolean
+     */
     protected function hasPubKey()
     {
         return $this->hasPubKey;

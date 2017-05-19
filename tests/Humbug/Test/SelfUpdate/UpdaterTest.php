@@ -13,14 +13,21 @@ namespace Humbug\Test\SelfUpdate;
 
 use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Strategy\StrategyInterface;
+use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @group UpdaterOnly
+ */
 class UpdaterTest extends TestCase
 {
     private $files;
 
     /** @var Updater */
     private $updater;
+
+    /** @var StrategyInterface */
+    private $strategy;
 
     private $tmp;
 
@@ -29,7 +36,8 @@ class UpdaterTest extends TestCase
         $this->tmp = sys_get_temp_dir();
         $this->files = __DIR__ . '/_files';
 
-        $this->updater = new Updater($this->files . '/test.phar');
+        $this->strategy = new ShaStrategy;
+        $this->updater = new Updater($this->strategy, true, $this->files . '/test.phar');
     }
 
     public function tearDown()
@@ -40,17 +48,17 @@ class UpdaterTest extends TestCase
     public function testConstruction()
     {
         // with key
-        $updater = new Updater($this->files . '/test.phar');
+        $updater = new Updater($this->strategy, true, $this->files . '/test.phar');
         $this->assertEquals($updater->getLocalPharFile(), $this->files . '/test.phar');
         $this->assertEquals($updater->getLocalPubKeyFile(), $this->files . '/test.phar.pubkey');
 
         // without key
-        $updater = new Updater($this->files . '/test.phar', false);
+        $updater = new Updater($this->strategy, false, $this->files . '/test.phar');
         $this->assertEquals($updater->getLocalPharFile(), $this->files . '/test.phar');
         $this->assertNull($updater->getLocalPubKeyFile());
 
         // no name - detect running console app
-        $updater = new Updater(null, false);
+        $updater = new Updater($this->strategy);
         $this->assertStringEndsWith(
             'phpunit.phar',
             basename($updater->getLocalPharFile(), '.phar') . '.phar'
@@ -60,7 +68,7 @@ class UpdaterTest extends TestCase
     public function testConstructorThrowsExceptionIfPubKeyNotExistsButFlagTrue()
     {
         $this->expectException('Humbug\\SelfUpdate\\Exception\\RuntimeException');
-        $updater = new Updater($this->files . '/test-nopubkey.phar');
+        $updater = new Updater($this->strategy, true, $this->files . '/test-nopubkey.phar');
     }
 
     public function testConstructorAncilliaryValues()
@@ -139,7 +147,7 @@ class UpdaterTest extends TestCase
         $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
-        $updater = new Updater($this->tmp . '/old.phar');
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/new.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/new.version');
         $this->assertTrue($updater->update());
@@ -156,7 +164,7 @@ class UpdaterTest extends TestCase
         chmod($this->tmp . '/old.phar', 0755);
         copy($this->files . '/build/badkey.phar.pubkey', $this->tmp . '/old.phar.pubkey');
 
-        $updater = new Updater($this->tmp . '/old.phar');
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/new.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/new.version');
 
@@ -189,7 +197,7 @@ class UpdaterTest extends TestCase
         /** Signature check should fail with invalid signature by a different privkey */
         $this->expectException('UnexpectedValueException');
 
-        $updater = new Updater($this->tmp . '/old.phar');
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/badsig.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/badsig.version');
         $updater->update();
@@ -201,7 +209,7 @@ class UpdaterTest extends TestCase
     public function testUpdatePharFailsIfDownloadPharIsUnsignedWhenExpected()
     {
         $this->createTestPharAndKey();
-        $updater = new Updater($this->tmp . '/old.phar');
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/nosig.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/nosig.version');
 
@@ -213,7 +221,7 @@ class UpdaterTest extends TestCase
     public function testSetBackupPathSetsThePathWhenTheDirectoryExistsAndIsWriteable()
     {
         $this->createTestPharAndKey();
-        $updater = new Updater($this->tmp . '/old.phar');
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->setBackupPath($this->tmp . '/backup.phar');
         $res = $updater->getBackupPath();
         $this->assertEquals($this->tmp . '/backup.phar', $res);
@@ -222,7 +230,7 @@ class UpdaterTest extends TestCase
     public function testSetRestorePathSetsThePathWhenTheDirectoryExistsAndIsWriteable()
     {
         $this->createTestPharAndKey();
-        $updater = new Updater($this->tmp . '/old.phar');
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->setRestorePath($this->tmp . '/backup.phar');
         $res = $updater->getRestorePath();
         $this->assertEquals($this->tmp . '/backup.phar', $res);
