@@ -194,6 +194,14 @@ the version string used by Github. This can follow any standard practice with
 recognisable pre- and postfixes, e.g.
 `v1.0.3`, `1.0.3`, `1.1`, `1.3rc`, `1.3.2pl2`.
 
+By default, the Github Strategy will not update beyond the current major version
+of the phar being updated. To allow updates to another major version (e.g. `1.1`
+to `2.0`), you should explicitly enable this on the strategy object.
+
+```php
+$strategy->allowMajorVersionUpdates();
+```
+
 If you wish to update to a non-stable version, for example where users want to
 update according to a development track, you can set the stability flag for the
 Github strategy. By default this is set to `stable` or, in constant form,
