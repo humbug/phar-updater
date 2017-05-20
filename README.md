@@ -342,8 +342,11 @@ To create a custom strategy, you can implement `Humbug\SelfUpdate\Strategy\Strat
 and pass a new instance of your implementation post-construction.
 
 ```php
-$updater = new Updater(null, false);
-$updater->setStrategyObject(new MyStrategy);
+$updater = new Updater(new MyStrategy, false);
+
+// OR (post construction)
+
+$updater->setStrategy(new MyStrategy);
 ```
 
 The similar `setStrategy()` method is solely used to pass flags matching internal

@@ -19,6 +19,27 @@ use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 final class Sha256Strategy extends ShaStrategyAbstract
 {
     /**
+     * Download the remote Phar file.
+     *
+     * @param Updater $updater
+     * @return void
+     */
+    public function download(Updater $updater)
+    {
+        parent::download($updater);
+
+        $tmpVersion = hash_file('sha256', $updater->getTempPharFile());
+
+        if ($tmpVersion !== $updater->getNewVersion()) {
+            throw new HttpRequestException(sprintf(
+                'Download file appears to be corrupted or outdated. The file '
+                    . 'received does not have the expected SHA-256 hash: %s.',
+                $updater->getNewVersion()
+            ));
+        }
+    }
+
+    /**
      * Retrieve the current version available remotely.
      *
      * @param Updater $updater
