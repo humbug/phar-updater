@@ -366,7 +366,7 @@ class Updater
         } catch (\Exception $e) {
             restore_error_handler();
             $this->cleanupAfterError();
-            throw $e; 
+            throw $e;
         }
 
         if (!file_exists($this->getTempPharFile())) {
