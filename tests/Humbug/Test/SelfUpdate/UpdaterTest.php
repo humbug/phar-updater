@@ -242,7 +242,7 @@ class UpdaterTest extends TestCase
 
     public function testCanSetCustomStrategyObjects()
     {
-        $this->updater->setStrategyObject(new FooStrategy);
+        $this->updater->setStrategy(new FooStrategy);
         $this->assertTrue($this->updater->getStrategy() instanceof FooStrategy);
     }
 

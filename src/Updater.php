@@ -107,7 +107,7 @@ class Updater
             $this->setLocalPubKeyFile();
         }
         $this->setTempDirectory();
-        $this->setStrategyObject($strategy);
+        $this->setStrategy($strategy);
     }
 
     /**
