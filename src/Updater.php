@@ -24,11 +24,6 @@ use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
 class Updater
 {
-    const STRATEGY_SHA1 = 'sha1';
-
-    const STRATEGY_SHA256 = 'sha256';
-
-    const STRATEGY_GITHUB = 'github';
 
     /**
      * @var StrategyInterface
@@ -157,29 +152,9 @@ class Updater
     }
 
     /**
-     * @param string $strategy
-     */
-    public function setStrategy($strategy)
-    {
-        switch ($strategy) {
-            case self::STRATEGY_GITHUB:
-                $this->strategy = new GithubStrategy;
-                break;
-
-            case self::STRATEGY_SHA256:
-                $this->strategy = new Sha256Strategy;
-                break;
-
-            default:
-                $this->strategy = new ShaStrategy;
-                break;
-        }
-    }
-
-    /**
      * @param StrategyInterface $strategy
      */
-    public function setStrategyObject(StrategyInterface $strategy)
+    public function setStrategy(StrategyInterface $strategy)
     {
         $this->strategy = $strategy;
     }
