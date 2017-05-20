@@ -52,12 +52,16 @@ will follow in time.
 Usage
 =====
 
-The default update strategy uses an SHA-1 hash of the current remote phar in a
+A basic strategy uses an SHA-256 hash of the current remote phar in a
 version file, and will update the local phar when this version is changed. There
 is also a Github strategy which tracks Github Releases where you can upload a
-new phar file for a release.
+new phar file for a release. If you need it for backwards compatibility, or a
+transition period, there is an alternative SHA-1 strategy.
 
-### Basic SHA-1 Strategy
+You can write custom strategies which must implement
+`\Humbug\SelfUpdate\Strategy\StrategyInterface`.
+
+### Basic SHA-256 Strategy
 
 Create your self-update command, or even an update command for some other phar
 other than the current one, and include this.
@@ -67,15 +71,20 @@ other than the current one, and include this.
  * The simplest usage assumes the currently running phar is to be updated and
  * that it has been signed with a private key (using OpenSSL).
  *
- * The first constructor parameter is the path to a phar if you are not updating
- * the currently running phar.
+ * The first constructor parameter is the strategy object, the second a boolean
+ * indicating if the phar is signed, and the third the path to a different PHAR.
+ * Only the first parameter is required.
  */
 
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\Strategy\Sha256Strategy;
 
-$updater = new Updater();
-$updater->getStrategy()->setPharUrl('https://example.com/current.phar');
-$updater->getStrategy()->setVersionUrl('https://example.com/current.version');
+$strategy = new Sha256Strategy();
+$strategy->setPharUrl('https://example.com/current.phar');
+$strategy->setVersionUrl('https://example.com/current.version');
+
+$updater = new Updater($strategy, true);
+
 try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
@@ -89,15 +98,19 @@ If you are not signing the phar using OpenSSL:
 
 ```php
 /**
- * The second parameter to the constructor must be false if your phars are
+ * The second parameter to the Updater constructor must be false if your phars are
  * not signed using OpenSSL.
  */
 
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\Strategy\Sha256Strategy;
 
-$updater = new Updater(null, false);
-$updater->getStrategy()->setPharUrl('https://example.com/current.phar');
-$updater->getStrategy()->setVersionUrl('https://example.com/current.version');
+$strategy = new Sha256Strategy();
+$strategy->setPharUrl('https://example.com/current.phar');
+$strategy->setVersionUrl('https://example.com/current.version');
+
+$updater = new Updater($strategy);
+
 try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
@@ -107,21 +120,26 @@ try {
 }
 ```
 
-If you need version information:
+If you need version information (for signed phars):
 
 ```php
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\Strategy\Sha256Strategy;
 
-$updater = new Updater();
-$updater->getStrategy()->setPharUrl('https://example.com/current.phar');
-$updater->getStrategy()->setVersionUrl('https://example.com/current.version');
+
+$strategy = new Sha256Strategy();
+$strategy->setPharUrl('https://example.com/current.phar');
+$strategy->setVersionUrl('https://example.com/current.version');
+
+$updater = new Updater($strategy, true);
+
 try {
     $result = $updater->update();
     if ($result) {
         $new = $updater->getNewVersion();
         $old = $updater->getOldVersion();
         printf(
-            'Updated from SHA-1 %s to SHA-1 %s', $old, $new
+            'Updated from SHA-256 %s to SHA-256 %s', $old, $new
         );
     } else {
         echo "No update needed!\n";
@@ -132,9 +150,9 @@ try {
 }
 ```
 
-See the Update Strategies section for an overview of how to setup the SHA-1
+See the Update Strategies section for an overview of how to setup the SHA-256
 strategy. It's a simple to maintain choice for development or nightly versions of
-phars which are released to a specific numbered version.
+phars which do not need SemVer version comparisons for updates.
 
 ### Github Release Strategy
 
@@ -147,14 +165,17 @@ the Github Release.
  * Other than somewhat different setters for the strategy, all other operations
  * are identical.
  */
-
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
-$updater = new Updater();
-$updater->setStrategy(Updater::STRATEGY_GITHUB);
-$updater->getStrategy()->setPackageName('myvendor/myapp');
-$updater->getStrategy()->setPharName('myapp.phar');
-$updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
+
+$strategy = new GithubStrategy();
+$strategy->setPackageName('myvendor/myapp');
+$strategy->setPharName('myapp.phar');
+$strategy->setCurrentLocalVersion('v1.0.1');
+
+$updater = new Updater($strategy);
+
 try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
@@ -172,6 +193,14 @@ with the local phar. This needs to be stored within the phar and should match
 the version string used by Github. This can follow any standard practice with
 recognisable pre- and postfixes, e.g.
 `v1.0.3`, `1.0.3`, `1.1`, `1.3rc`, `1.3.2pl2`.
+
+By default, the Github Strategy will not update beyond the current major version
+of the phar being updated. To allow updates to another major version (e.g. `1.1`
+to `2.0`), you should explicitly enable this on the strategy object.
+
+```php
+$strategy->allowMajorVersionUpdates();
+```
 
 If you wish to update to a non-stable version, for example where users want to
 update according to a development track, you can set the stability flag for the
@@ -199,7 +228,8 @@ use Humbug\SelfUpdate\Updater;
 /**
  * Same constructor parameters as you would use for updating. Here, just defaults.
  */
-$updater = new Updater();
+$strategy = new SomeStrategy();
+$updater = new Updater($strategy);
 try {
     $result = $updater->rollback();
     if (!$result) {
@@ -225,30 +255,23 @@ The Updater constructor is fairly simple. The three basic variations are:
 
 ```php
 /**
- * Default: Update currently running phar which has been signed.
+ * Default: Update currently running phar using passed strategy.
  */
-$updater = new Updater;
+$updater = new Updater(new SomeStrategy);
 ```
 
 ```php
 /**
- * Update currently running phar which has NOT been signed.
+ * Update currently running phar which HAS been signed.
  */
-$updater = new Updater(null, false);
-```
-
-```php
-/**
- * Use a strategy other than the default SHA Hash.
- */
-$updater = new Updater(null, false, Updater::STRATEGY_GITHUB);
+$updater = new Updater(new SomeStrategy, true);
 ```
 
 ```php
 /**
  * Update a different phar which has NOT been signed.
  */
-$updater = new Updater('/path/to/impersonatephil.phar', false);
+$updater = new Updater(new SomeStrategy, false, '/path/to/impersonatephil.phar');
 ```
 
 ### Check For Updates
@@ -263,20 +286,22 @@ where a version did exist, but `false` if not.
 
 ```php
 use Humbug\SelfUpdate\Updater;
+use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
 /**
  * Configuration is identical in every way for actual updates. You can run this
  * across multiple configuration variants to get recent stable, unstable, and dev
  * versions available.
  *
- * This would configure update for an unsigned phar (second constructor must be
- * false in this case).
+ * This would configure update for an unsigned phar (second parameter must be set
+ * as `true` otherwise).
  */
-$updater = new Updater(null, false);
-$updater->setStrategy(Updater::STRATEGY_GITHUB);
-$updater->getStrategy()->setPackageName('myvendor/myapp');
-$updater->getStrategy()->setPharName('myapp.phar');
-$updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
+$strategy = new GithubStrategy();
+$strategy->setPackageName('myvendor/myapp');
+$strategy->setPharName('myapp.phar');
+$strategy->setCurrentLocalVersion('v1.0.1');
+
+$updater = new Updater($strategy);
 
 try {
     $result = $updater->hasUpdate();
@@ -317,8 +342,11 @@ To create a custom strategy, you can implement `Humbug\SelfUpdate\Strategy\Strat
 and pass a new instance of your implementation post-construction.
 
 ```php
-$updater = new Updater(null, false);
-$updater->setStrategyObject(new MyStrategy);
+$updater = new Updater(new MyStrategy, false);
+
+// OR (post construction)
+
+$updater->setStrategy(new MyStrategy);
 ```
 
 The similar `setStrategy()` method is solely used to pass flags matching internal
@@ -327,11 +355,11 @@ strategies.
 Update Strategies
 =================
 
-SHA-1 Hash Synchronisation
+SHA-256 Hash Synchronisation
 --------------------------
 
 The phar-updater package only (that will change!) supports an update strategy
-where phars are updated according to the SHA-1 hash of the current phar file
+where phars are updated according to the SHA-256 hash of the current phar file
 available remotely. This assumes the existence of only two to three remote files:
 
 * myname.phar
@@ -345,11 +373,11 @@ the hash is the very first string (if not the only string). You can generate thi
 quite easily from bash using:
 
 ```sh
-sha1sum myname.phar > myname.version
+sha256sum myname.phar > myname.version
 ```
 
 Remember to regenerate the version file for each new phar build you want to distribute.
-Using `sha1sum` adds additional data after the hash, but it's fine since the hash is
+Using `sha256sum` adds additional data after the hash, but it's fine since the hash is
 the first string in the file which is the only requirement.
 
 If using OpenSSL signing, which is very much recommended, you can also put the

@@ -24,11 +24,6 @@ use Humbug\SelfUpdate\Strategy\GithubStrategy;
 
 class Updater
 {
-    const STRATEGY_SHA1 = 'sha1';
-
-    const STRATEGY_SHA256 = 'sha256';
-
-    const STRATEGY_GITHUB = 'github';
 
     /**
      * @var StrategyInterface
@@ -93,11 +88,11 @@ class Updater
     /**
      * Constructor
      *
-     * @param string $localPharFile
-     * @param bool $hasPubKey
      * @param string $strategy
+     * @param bool $hasPubKey
+     * @param string $localPharFile
      */
-    public function __construct($localPharFile = null, $hasPubKey = true, $strategy = self::STRATEGY_SHA1)
+    public function __construct(StrategyInterface $strategy, $hasPubKey = false, $localPharFile = null)
     {
         ini_set('phar.require_hash', 1);
         $this->setLocalPharFile($localPharFile);
@@ -157,30 +152,16 @@ class Updater
     }
 
     /**
-     * @param string $strategy
+     * @param StrategyInterface $strategy
      */
-    public function setStrategy($strategy)
-    {
-        switch ($strategy) {
-            case self::STRATEGY_GITHUB:
-                $this->strategy = new GithubStrategy;
-                break;
-
-            case self::STRATEGY_SHA256:
-                $this->strategy = new Sha256Strategy;
-                break;
-
-            default:
-                $this->strategy = new ShaStrategy;
-                break;
-        }
-    }
-
-    public function setStrategyObject(StrategyInterface $strategy)
+    public function setStrategy(StrategyInterface $strategy)
     {
         $this->strategy = $strategy;
     }
 
+    /**
+     * @return StrategyInterface
+     */
     public function getStrategy()
     {
         return $this->strategy;
@@ -206,26 +187,41 @@ class Updater
         return $this->backupExtension;
     }
 
+    /**
+     * @return string
+     */
     public function getLocalPharFile()
     {
         return $this->localPharFile;
     }
 
+    /**
+     * @return string
+     */
     public function getLocalPharFileBasename()
     {
         return $this->localPharFileBasename;
     }
 
+    /**
+     * @return string
+     */
     public function getLocalPubKeyFile()
     {
         return $this->localPubKeyFile;
     }
 
+    /**
+     * @return string
+     */
     public function getTempDirectory()
     {
         return $this->tempDirectory;
     }
 
+    /**
+     * @return string
+     */
     public function getTempPharFile()
     {
         return $this->getTempDirectory()
@@ -233,11 +229,17 @@ class Updater
             . sprintf('%s.phar.temp', $this->getLocalPharFileBasename());
     }
 
+    /**
+     * @return string
+     */
     public function getNewVersion()
     {
         return $this->newVersion;
     }
 
+    /**
+     * @return string
+     */
     public function getOldVersion()
     {
         return $this->oldVersion;
@@ -305,16 +307,29 @@ class Updater
         return $this->restorePath;
     }
 
+    /**
+     * @param  int    $errno
+     * @param  string $errstr
+     * @throws RuntimeException
+     */
     public function throwRuntimeException($errno, $errstr)
     {
         throw new RuntimeException($errstr);
     }
 
+    /**
+     * @param  int    $errno
+     * @param  string $errstr
+     * @throws HttpRequestException
+     */
     public function throwHttpRequestException($errno, $errstr)
     {
         throw new HttpRequestException($errstr);
     }
 
+    /**
+     * @return boolean
+     */
     protected function hasPubKey()
     {
         return $this->hasPubKey;
@@ -346,33 +361,18 @@ class Updater
 
     protected function downloadPhar()
     {
-        $this->strategy->download($this);
+        try {
+            $this->strategy->download($this);
+        } catch (\Exception $e) {
+            restore_error_handler();
+            $this->cleanupAfterError();
+            throw $e;
+        }
 
         if (!file_exists($this->getTempPharFile())) {
             throw new FilesystemException(
                 'Creation of download file failed.'
             );
-        }
-
-        if ($this->getStrategy() instanceof ShaStrategy
-            || $this->getStrategy() instanceof Sha256Strategy
-        ) {
-            if ($this->getStrategy() instanceof ShaStrategy) {
-                $tmpVersion = sha1_file($this->getTempPharFile());
-                $algo = 'SHA-1';
-            } else {
-                $tmpVersion = hash_file('sha256', $this->getTempPharFile());
-                $algo = 'SHA-256';
-            }
-            if ($tmpVersion !== $this->getNewVersion()) {
-                $this->cleanupAfterError();
-                throw new HttpRequestException(sprintf(
-                    'Download file appears to be corrupted or outdated. The file '
-                        . 'received does not have the expected %s hash: %s.',
-                    $algo,
-                    $this->getNewVersion()
-                ));
-            }
         }
 
         try {

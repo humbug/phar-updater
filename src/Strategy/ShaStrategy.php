@@ -19,8 +19,28 @@ use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 /**
  * @deprecated 1.0.4 SHA-1 is increasingly susceptible to collision attacks; use SHA-256
  */
-class ShaStrategy extends ShaStrategyAbstract
+final class ShaStrategy extends ShaStrategyAbstract
 {
+    /**
+     * Download the remote Phar file.
+     *
+     * @param Updater $updater
+     * @return void
+     */
+    public function download(Updater $updater)
+    {
+        parent::download($updater);
+
+        $tmpVersion = sha1_file($updater->getTempPharFile());
+
+        if ($tmpVersion !== $updater->getNewVersion()) {
+            throw new HttpRequestException(sprintf(
+                'Download file appears to be corrupted or outdated. The file '
+                    . 'received does not have the expected SHA-1 hash: %s.',
+                $updater->getNewVersion()
+            ));
+        }
+    }
 
     /**
      * Retrieve the current version available remotely.
@@ -32,7 +52,7 @@ class ShaStrategy extends ShaStrategyAbstract
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $version = humbug_get_contents($this->getVersionUrl());
+        $version = file_get_contents($this->getVersionUrl());
         restore_error_handler();
         if (false === $version) {
             throw new HttpRequestException(sprintf(

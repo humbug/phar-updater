@@ -22,6 +22,9 @@ class UpdaterSha256StrategyTest extends TestCase
     /** @var Updater */
     private $updater;
 
+    /** @var Sha256Strategy */
+    private $strategy;
+
     private $tmp;
 
     private $data;
@@ -30,7 +33,9 @@ class UpdaterSha256StrategyTest extends TestCase
     {
         $this->tmp = sys_get_temp_dir();
         $this->files = __DIR__ . '/_files';
-        $this->updater = new Updater($this->files . '/test.phar', true, Updater::STRATEGY_SHA256);
+
+        $this->strategy = new Sha256Strategy;
+        $this->updater = new Updater($this->strategy, true, $this->files . '/test.phar');
     }
 
     public function teardown()
@@ -40,7 +45,7 @@ class UpdaterSha256StrategyTest extends TestCase
 
     public function testConstruction()
     {
-        $updater = new Updater(null, false, Updater::STRATEGY_SHA256);
+        $updater = new Updater($this->strategy, false);
         $this->assertTrue(
             $updater->getStrategy() instanceof Sha256Strategy
         );
@@ -127,7 +132,7 @@ class UpdaterSha256StrategyTest extends TestCase
         $this->createTestPharAndKey();
         $this->assertEquals('old', $this->getPharOutput($this->tmp . '/old.phar'));
 
-        $updater = new Updater($this->tmp . '/old.phar', true, Updater::STRATEGY_SHA256);
+        $updater = new Updater($this->strategy, true, $this->tmp . '/old.phar');
         $updater->getStrategy()->setPharUrl('file://' . $this->files . '/build/new.phar');
         $updater->getStrategy()->setVersionUrl('file://' . $this->files . '/build/new.sha256.version');
         $this->assertTrue($updater->update());
