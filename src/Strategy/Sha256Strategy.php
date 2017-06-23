@@ -4,7 +4,7 @@
  *
  * @category   Humbug
  * @package    Humbug
- * @copyright  Copyright (c) 2015 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2017 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    https://github.com/padraic/phar-updater/blob/master/LICENSE New BSD License
  *
  * This class is partially patterned after Composer's self-update.
@@ -16,12 +16,8 @@ use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 
-/**
- * @deprecated 1.0.4 SHA-1 is increasingly susceptible to collision attacks; use SHA-256
- */
-class ShaStrategy extends ShaStrategyAbstract
+final class Sha256Strategy extends ShaStrategyAbstract
 {
-
     /**
      * Retrieve the current version available remotely.
      *
@@ -44,7 +40,7 @@ class ShaStrategy extends ShaStrategyAbstract
                 'Version request returned empty response.'
             );
         }
-        if (!preg_match('%^[a-z0-9]{40}%', $version, $matches)) {
+        if (!preg_match('%^[a-z0-9]{64}%', $version, $matches)) {
             throw new HttpRequestException(
                 'Version request returned incorrectly formatted response.'
             );
@@ -61,6 +57,6 @@ class ShaStrategy extends ShaStrategyAbstract
      */
     public function getCurrentLocalVersion(Updater $updater)
     {
-        return sha1_file($updater->getLocalPharFile());
+        return hash_file('sha256', $updater->getLocalPharFile());
     }
 }
