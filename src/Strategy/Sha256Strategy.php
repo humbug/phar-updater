@@ -12,9 +12,8 @@
 
 namespace Humbug\SelfUpdate\Strategy;
 
-use Humbug\SelfUpdate\Updater;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
-use Humbug\SelfUpdate\Exception\InvalidArgumentException;
+use Humbug\SelfUpdate\Updater;
 
 final class Sha256Strategy extends ShaStrategyAbstract
 {
@@ -28,7 +27,7 @@ final class Sha256Strategy extends ShaStrategyAbstract
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $version = humbug_get_contents($this->getVersionUrl());
+        $version = \Humbug\get_contents($this->getVersionUrl());
         restore_error_handler();
         if (false === $version) {
             throw new HttpRequestException(sprintf(
