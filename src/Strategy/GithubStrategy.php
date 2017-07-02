@@ -17,6 +17,7 @@ use Humbug\SelfUpdate\VersionParser;
 use Humbug\SelfUpdate\Exception\HttpRequestException;
 use Humbug\SelfUpdate\Exception\InvalidArgumentException;
 use Humbug\SelfUpdate\Exception\JsonParsingException;
+use function Humbug\get_contents;
 
 class GithubStrategy implements StrategyInterface
 {
@@ -68,7 +69,7 @@ class GithubStrategy implements StrategyInterface
     {
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
-        $result = \Humbug\get_contents($this->remoteUrl);
+        $result = get_contents($this->remoteUrl);
         restore_error_handler();
         if (false === $result) {
             throw new HttpRequestException(sprintf(
@@ -90,7 +91,7 @@ class GithubStrategy implements StrategyInterface
         /** Switch remote request errors to HttpRequestExceptions */
         set_error_handler(array($updater, 'throwHttpRequestException'));
         $packageUrl = $this->getApiUrl();
-        $package = json_decode(\Humbug\get_contents($packageUrl), true);
+        $package = json_decode(get_contents($packageUrl), true);
         restore_error_handler();
 
         if (null === $package || json_last_error() !== JSON_ERROR_NONE) {
