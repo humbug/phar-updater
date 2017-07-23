@@ -159,7 +159,7 @@ try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
 } catch (\Exception $e) {
-    echo 'Well, something happened! Either an oopsie or something involving hackers.\n";
+    echo "Well, something happened! Either an oopsie or something involving hackers.\n";
     exit(1);
 }
 ```
