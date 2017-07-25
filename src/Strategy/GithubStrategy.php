@@ -21,7 +21,7 @@ use function Humbug\get_contents;
 
 class GithubStrategy implements StrategyInterface
 {
-    const API_URL = 'https://packagist.org/packages/%s.json';
+    const API_URL = 'https://packagist.org/p/%s.json';
 
     const STABLE = 'stable';
 
@@ -101,7 +101,7 @@ class GithubStrategy implements StrategyInterface
             );
         }
 
-        $versions = array_keys($package['package']['versions']);
+        $versions = array_keys($package['packages'][$this->getPackageName()]);
         $versionParser = new VersionParser($versions);
         if ($this->getStability() === self::STABLE) {
             $this->remoteVersion = $versionParser->getMostRecentStable();
@@ -217,7 +217,7 @@ class GithubStrategy implements StrategyInterface
         $baseUrl = preg_replace(
             '{\.git$}',
             '',
-            $package['package']['versions'][$this->remoteVersion]['source']['url']
+            $package['packages'][$this->getPackageName()][$this->remoteVersion]['source']['url']
         );
         $downloadUrl = sprintf(
             '%s/releases/download/%s/%s',
