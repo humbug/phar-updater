@@ -27,7 +27,7 @@ minions (all ten of them) have written one for you.
 Introduction
 ============
 
-The `padraic\phar-updater` package has the following features:
+The `padraic/phar-updater` package has the following features:
 
 * Full support for SSL/TLS verification.
 * Support for OpenSSL phar signatures.
