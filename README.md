@@ -155,6 +155,7 @@ $updater->setStrategy(Updater::STRATEGY_GITHUB);
 $updater->getStrategy()->setPackageName('myvendor/myapp');
 $updater->getStrategy()->setPharName('myapp.phar');
 $updater->getStrategy()->setCurrentLocalVersion('v1.0.1');
+$updater->getStrategy()->blockMajorVersionUpdates();
 try {
     $result = $updater->update();
     echo $result ? "Updated!\n" : "No update needed!\n";
@@ -173,6 +174,11 @@ the version string used by Github. This can follow any standard practice with
 recognisable pre- and postfixes, e.g.
 `v1.0.3`, `1.0.3`, `1.1`, `1.3rc`, `1.3.2pl2`.
 
+By default, updating will take into account all available major versions unless
+you set `blockMajorVersionUpdates()`. It's useful to block updates between major
+versions where, for example, support for two major versions overlaps subject to
+a user option or some other transition point.
+
 If you wish to update to a non-stable version, for example where users want to
 update according to a development track, you can set the stability flag for the
 Github strategy. By default this is set to `stable` or, in constant form,
@@ -186,6 +192,14 @@ If you want to ignore stability and just update to the most recent version regar
 
 ```php
 $updater->getStrategy()->setStability('any');
+```
+
+You can prevent updates to the next significant major version (e.g. 1.x to 2.x),
+for example, if you want the user to specifically agree to it or you have specific
+pre-conditions before doing so, using:
+
+```php
+$updater->getStrategy()->blockMajorVersionUpdates();
 ```
 
 ### Rollback Support

@@ -60,6 +60,11 @@ class GithubStrategy implements StrategyInterface
     private $stability = self::STABLE;
 
     /**
+     * @var bool
+     */
+    private $allowMajor = true;
+
+    /**
      * Download the remote Phar file.
      *
      * @param Updater $updater
@@ -102,6 +107,11 @@ class GithubStrategy implements StrategyInterface
         }
 
         $versions = array_keys($package['package']['versions']);
+
+        if (false === $this->allowMajor) {
+            $versions = $this->filterByLocalMajorVersion($versions);
+        }
+
         $versionParser = new VersionParser($versions);
         if ($this->getStability() === self::STABLE) {
             $this->remoteVersion = $versionParser->getMostRecentStable();
@@ -182,6 +192,11 @@ class GithubStrategy implements StrategyInterface
         return $this->pharName;
     }
 
+    public function blockMajorVersionUpdates()
+    {
+        $this->allowMajor = false;
+    }
+
     /**
      * Set target stability
      *
@@ -226,5 +241,21 @@ class GithubStrategy implements StrategyInterface
             $this->getPharName()
         );
         return $downloadUrl;
+    }
+
+    /**
+     * Filter a list of versions to those that match the current local version.
+     *
+     * @param string[] $versions
+     * @return string[]
+     */
+    private function filterByLocalMajorVersion(array $versions)
+    {
+        list($localMajorVersion, ) = explode('.', $this->localVersion, 2);
+
+        return array_filter($versions, function ($version) use ($localMajorVersion) {
+            list($majorVersion, ) = explode('.', $version, 2);
+            return $majorVersion === $localMajorVersion;
+        });
     }
 }
