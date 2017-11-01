@@ -167,4 +167,53 @@ class VersionParserTest extends TestCase
         $this->assertTrue($parser->isDevelopment('1.0.0-dev'));
         $this->assertTrue($parser->isDevelopment('1.0.0-alpha1-5-g5b46ad8'));
     }
+
+    public function testEqualsWithSameSemverVersion()
+    {
+        $v1 = '1.2.3';
+        $v2 = '1.2.3';
+        $this->assertTrue(VersionParser::equals($v1, $v2));
+    }
+
+    public function testEqualsWithDifferentSemverVersion()
+    {
+        $v1 = '1.2.3';
+        $v2 = '1.2.4';
+        $this->assertFalse(VersionParser::equals($v1, $v2));
+    }
+
+    public function testEqualsWithSameSemverVersionButPrefixed()
+    {
+        $v1 = '1.2.3';
+        $v2 = 'v1.2.3';
+        $this->assertTrue(VersionParser::equals($v1, $v2));
+    }
+
+    public function testEqualsWithSameSemverVersionButGitData()
+    {
+        $v1 = '1.2.3-5-g5b46ad8';
+        $v2 = '1.2.3-5-g5b46ad8';
+        $this->assertTrue(VersionParser::equals($v1, $v2));
+    }
+
+    public function testEqualsWithDifferentSemverVersionButGitData()
+    {
+        $v1 = '1.2.3-5-g5b46ad8';
+        $v2 = '1.2.4-5-g5b46ad8';
+        $this->assertFalse(VersionParser::equals($v1, $v2));
+    }
+
+    public function testEqualsWithSameSemverVersionButStabilityDiffers()
+    {
+        $v1 = '1.2.3-alpha';
+        $v2 = '1.2.3';
+        $this->assertFalse(VersionParser::equals($v1, $v2));
+    }
+
+    public function testEqualsWithSameSemverVersionButStabilitySameButNumberedOff()
+    {
+        $v1 = '1.2.3-alpha';
+        $v2 = '1.2.3-alpha2';
+        $this->assertFalse(VersionParser::equals($v1, $v2));
+    }
 }

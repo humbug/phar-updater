@@ -12,6 +12,9 @@
 
 namespace Humbug\SelfUpdate;
 
+use Composer\Semver\Semver;
+use Composer\Semver\VersionParser as Parser;
+
 class VersionParser
 {
 
@@ -21,9 +24,14 @@ class VersionParser
     private $versions;
 
     /**
+     * @var Composer\VersionParser
+     */
+    private $parser;
+
+    /**
      * @var string
      */
-    private $modifier = '[._-]?(?:(stable|beta|b|RC|alpha|a|patch|pl|p)(?:[.-]?(\d+))?)?([.-]?dev)?';
+    const GIT_DATA_MATCH = '/.*(-\d+-g[[:alnum:]]{7})$/';
 
     /**
      * @param array $versions
@@ -31,6 +39,7 @@ class VersionParser
     public function __construct(array $versions = array())
     {
         $this->versions = $versions;
+        $this->parser = new Parser; 
     }
 
     /**
@@ -112,6 +121,20 @@ class VersionParser
         return $this->development($version);
     }
 
+    /**
+     * Checks if two version strings are the same normalised version.
+     * 
+     * @param  string
+     * @param  string
+     * @return bool
+     */
+    public static function equals($version1, $version2)
+    {
+        $parser = new Parser;
+        return $parser->normalize(self::stripGitHash($version1))
+            === $parser->normalize(self::stripGitHash($version2)); 
+    }
+
     private function selectRecentStable()
     {
         $candidates = array();
@@ -159,44 +182,31 @@ class VersionParser
 
     private function findMostRecent(array $candidates)
     {
-        $candidate = null;
-        $tracker = null;
-        foreach ($candidates as $version) {
-            if (version_compare($candidate, $version, '<')) {
-                $candidate = $version;
-            }
-        }
-        return $candidate;
+        $sorted = Semver::rsort($candidates);
+        return $sorted[0];
     }
 
     private function stable($version)
     {
-        $version = preg_replace('{#.+$}i', '', $version);
-        if ($this->development($version)) {
-            return false;
+        if ('stable' === Parser::parseStability(self::stripGitHash($version))) {
+            return true;
         }
-        preg_match('{'.$this->modifier.'$}i', strtolower($version), $match);
-        if (!empty($match[3])) {
-            return false;
-        }
-        if (!empty($match[1])) {
-            if ('beta' === $match[1] || 'b' === $match[1]
-            || 'alpha' === $match[1] || 'a' === $match[1]
-            || 'rc' === $match[1]) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
     private function development($version)
     {
-        if ('dev-' === substr($version, 0, 4) || '-dev' === substr($version, -4)) {
-            return true;
-        }
-        if (1 == preg_match("/-\d+-[a-z0-9]{8,}$/", $version)) {
+        if ('dev' === Parser::parseStability(self::stripGitHash($version))) {
             return true;
         }
         return false;
+    }
+
+    private static function stripGitHash($version)
+    {
+        if (preg_match(self::GIT_DATA_MATCH, $version, $matches)) {
+            $version = str_replace($matches[1], '-dev', $version);
+        }
+        return $version;
     }
 }
