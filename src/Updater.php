@@ -21,6 +21,7 @@ use Humbug\SelfUpdate\Strategy\StrategyInterface;
 use Humbug\SelfUpdate\Strategy\ShaStrategy;
 use Humbug\SelfUpdate\Strategy\Sha256Strategy;
 use Humbug\SelfUpdate\Strategy\GithubStrategy;
+use Humbug\SelfUpdate\Strategy\ManifestStrategy;
 
 class Updater
 {
@@ -29,6 +30,8 @@ class Updater
     const STRATEGY_SHA256 = 'sha256';
 
     const STRATEGY_GITHUB = 'github';
+
+    const STRATEGY_MANIFEST = 'manifest';
 
     /**
      * @var StrategyInterface
@@ -168,6 +171,10 @@ class Updater
 
             case self::STRATEGY_SHA256:
                 $this->strategy = new Sha256Strategy;
+                break;
+
+            case self::STRATEGY_MANIFEST:
+                $this->strategy = new ManifestStrategy;
                 break;
 
             default:
