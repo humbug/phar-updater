@@ -301,11 +301,19 @@ class Updater
 
     public function throwRuntimeException($errno, $errstr)
     {
+        if (E_USER_DEPRECATED === $errno) {
+            return;
+        }
+
         throw new RuntimeException($errstr);
     }
 
     public function throwHttpRequestException($errno, $errstr)
     {
+        if (E_USER_DEPRECATED === $errno) {
+            return;
+        }
+
         throw new HttpRequestException($errstr);
     }
 
