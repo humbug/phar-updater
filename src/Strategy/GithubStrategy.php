@@ -209,7 +209,7 @@ class GithubStrategy implements StrategyInterface
 
     protected function getApiUrl()
     {
-        return sprintf(self::API_URL, $this->getPackageName());
+        return sprintf(self::API_URL, $this->getPackageName()).'?'.rand();
     }
 
     protected function getDownloadUrl(array $package)
