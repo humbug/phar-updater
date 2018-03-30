@@ -109,7 +109,7 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         $updater = new Updater($this->tmp . '/old.phar');
         $updater->setStrategyObject(new GithubTestStrategy);
         $updater->getStrategy()->setPharName('new.phar');
-        $updater->getStrategy()->setPackageName(''); // not used in this test
+        $updater->getStrategy()->setPackageName('humbug/test-phar');
         $updater->getStrategy()->setCurrentLocalVersion('1.0.0');
 
         $this->assertTrue($updater->update());
@@ -132,7 +132,7 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         @unlink($this->tmp . '/releases/download/1.0.1/new.phar');
         @unlink($this->tmp . '/releases/download/1.0.1/new.phar.pubkey');
         @unlink($this->tmp . '/old.1c7049180abee67826d35ce308c38272242b64b8.phar');
-        @unlink($this->tmp . '/package.json');
+        @unlink($this->tmp . '/packages.json');
     }
 
     private function createTestPharAndKey()
@@ -145,9 +145,9 @@ class UpdaterGithubStrategyTest extends \PHPUnit_Framework_TestCase
         );
         @mkdir($this->tmp.'/releases/download/1.0.1', 0755, true);
         copy($this->files.'/build/new.phar', $this->tmp.'/releases/download/1.0.1/new.phar');
-        file_put_contents($this->tmp . '/package.json', json_encode(array(
-            'package' => array(
-                'versions' => array(
+        file_put_contents($this->tmp . '/packages.json', json_encode(array(
+            'packages' => array(
+                'humbug/test-phar' => array(
                     '1.0.1' => array(
                         'source' => array(
                             'url' => 'file://' . $this->tmp . '.git'
@@ -165,6 +165,6 @@ class GithubTestStrategy extends GithubStrategy
 {
     protected function getApiUrl()
     {
-        return 'file://' . sys_get_temp_dir() . '/package.json';
+        return 'file://' . sys_get_temp_dir() . '/packages.json';
     }
 }
